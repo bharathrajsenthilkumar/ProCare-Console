@@ -60,3 +60,28 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             detail=f"Authentication failed: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+def require_console_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    email = current_user.get("email")
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authenticated user email is missing from claims.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    # Normalize email safely for comparison
+    normalized_email = email.strip().lower()
+    
+    # Load allowlist from backend configuration settings
+    allowlist_str = settings.CONSOLE_ADMIN_EMAILS or ""
+    admin_emails = [e.strip().lower() for e in allowlist_str.split(",") if e.strip()]
+    
+    if normalized_email not in admin_emails:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access forbidden: user is not an authorized console administrator."
+        )
+        
+    return current_user
+

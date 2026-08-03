@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str
     SUPABASE_SERVICE_ROLE_KEY: str
     SUPABASE_JWT_SECRET: str | None = None
+    CONSOLE_ADMIN_EMAILS: str = "admin@example.com"
     
     # CORS configuration
     ALLOWED_ORIGINS: list[str] = [
@@ -14,6 +15,7 @@ class Settings(BaseSettings):
         "http://localhost:3001",
         "http://127.0.0.1:3001",
     ]
+
 
     model_config = SettingsConfigDict(
         env_file=".env",
