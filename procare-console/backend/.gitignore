@@ -1,0 +1,21 @@
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+env/
+ENV/
+pyvenv.cfg
+.python-version
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
