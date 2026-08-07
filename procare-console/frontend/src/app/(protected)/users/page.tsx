@@ -13,15 +13,16 @@ import {
   MessageSquare, 
   AlertCircle,
   Phone,
-  UserCheck,
-  Calendar
+  Download,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import Link from 'next/link';
 
@@ -59,6 +60,12 @@ export default function UsersPage() {
   const [userDetail, setUserDetail] = useState<User | null>(null);
   const [userSessions, setUserSessions] = useState<Session[]>([]);
 
+  // Selection, Delete & Export States
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+
   // Debounce search input (400ms delay)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,39 +75,41 @@ export default function UsersPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Fetch Users
-  useEffect(() => {
-    async function fetchUsers() {
-      if (!session) return;
-      setLoading(true);
-      setError(null);
-      
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
-      let url = `${apiUrl}/users?page=${page}&limit=${limit}`;
-      if (debouncedSearch) {
-        url += `&search=${encodeURIComponent(debouncedSearch)}`;
-      }
-
-      try {
-        const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data.users);
-          setTotal(data.total);
-        } else {
-          setError('Failed to retrieve patient registry.');
-        }
-      } catch (err) {
-        setError('Network error: Unable to reach backend server.');
-      } finally {
-        setLoading(false);
-      }
+  // Fetch Users function (made accessible to other actions)
+  const fetchUsers = async () => {
+    if (!session) return;
+    setLoading(true);
+    setError(null);
+    setSelectedUserIds([]); // Reset selection on page refresh/fetch
+    
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+    let url = `${apiUrl}/users?page=${page}&limit=${limit}`;
+    if (debouncedSearch) {
+      url += `&search=${encodeURIComponent(debouncedSearch)}`;
     }
 
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users);
+        setTotal(data.total);
+      } else {
+        setError('Failed to retrieve patient registry.');
+      }
+    } catch (err) {
+      setError('Network error: Unable to reach backend server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch Users on parameters change
+  useEffect(() => {
     fetchUsers();
   }, [session, page, debouncedSearch]);
 
@@ -139,8 +148,99 @@ export default function UsersPage() {
     fetchUserDetail();
   }, [selectedUserId, session]);
 
+  const handleSelectUser = (id: string) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedUserIds.length === users.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(users.map((u) => u.id));
+    }
+  };
+
+  const handleExportCSV = async () => {
+    if (!session) return;
+    setExportLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+      const response = await fetch(`${apiUrl}/users/export`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert('Failed to export users data.');
+      }
+    } catch (err) {
+      alert('Network error while exporting users.');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (!session || selectedUserIds.length === 0) return;
+    setDeleteLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+      const response = await fetch(`${apiUrl}/users`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ ids: selectedUserIds }),
+      });
+      if (response.ok) {
+        setSelectedUserIds([]);
+        setIsDeleteConfirmOpen(false);
+        fetchUsers();
+      } else {
+        alert('Failed to delete selected users.');
+      }
+    } catch (err) {
+      alert('Network error while deleting users.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   // Columns configuration for Users table
   const columns: Column<User>[] = [
+    {
+      header: (
+        <input
+          type="checkbox"
+          checked={users.length > 0 && selectedUserIds.length === users.length}
+          onChange={handleSelectAll}
+          className="rounded border-slate-300 text-slate-800 focus:ring-slate-500 w-4 h-4 cursor-pointer"
+        />
+      ),
+      accessor: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedUserIds.includes(row.id)}
+          onChange={() => handleSelectUser(row.id)}
+          className="rounded border-slate-300 text-slate-800 focus:ring-slate-500 w-4 h-4 cursor-pointer"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ),
+      className: 'w-12 text-center',
+    },
     {
       header: 'Patient Name',
       accessor: (row) => (
@@ -191,8 +291,31 @@ export default function UsersPage() {
         title="User Profiles & Portal Directory" 
         description="Oversee registered patient logins, diagnostic permissions, and physician administrator portal access."
         actions={
-          <div className="text-xs text-slate-500 font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs">
-            Total Patients: <span className="text-slate-800">{total}</span>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={exportLoading || users.length === 0}
+              className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs"
+            >
+              <Download className="w-4 h-4 mr-1.5" />
+              {exportLoading ? 'Exporting...' : 'Export CSV'}
+            </Button>
+            {selectedUserIds.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsDeleteConfirmOpen(true)}
+                className="bg-rose-50 border-rose-200 hover:bg-rose-100 text-rose-700 shadow-xs"
+              >
+                <Trash2 className="w-4 h-4 mr-1.5" />
+                Delete Selected ({selectedUserIds.length})
+              </Button>
+            )}
+            <div className="text-xs text-slate-500 font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center">
+              Total Patients: <span className="text-slate-800 ml-1">{total}</span>
+            </div>
           </div>
         }
       />
@@ -274,11 +397,39 @@ export default function UsersPage() {
         </div>
       )}
 
+      {/* Manual Delete Confirmation Dialog */}
+      {isDeleteConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs" onClick={() => setIsDeleteConfirmOpen(false)} />
+          <div className="bg-white border border-slate-200 shadow-xl rounded-2xl w-full max-w-md flex flex-col relative z-10 p-6 animate-scale-in">
+            <div className="flex items-center gap-3 text-rose-600 mb-4">
+              <AlertTriangle className="h-6 w-6" />
+              <h3 className="text-base font-bold">Delete Selected Users?</h3>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+              You are about to permanently delete <strong className="text-slate-800">{selectedUserIds.length}</strong> selected user records. This action cannot be undone and will remove all their portal configurations.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setIsDeleteConfirmOpen(false)} disabled={deleteLoading}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleDeleteSelected} 
+                disabled={deleteLoading}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-semibold border-rose-600 focus:ring-rose-500"
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete Permanently'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Patient Profile Detail Modal */}
       {selectedUserId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
-          <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs animate-fade-in" onClick={() => setSelectedUserId(null)} />
+          <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs" onClick={() => setSelectedUserId(null)} />
           
           {/* Modal Card */}
           <div className="bg-white border border-slate-200 shadow-xl rounded-2xl w-full max-w-xl max-h-[85vh] flex flex-col relative z-10 animate-scale-in overflow-hidden">

@@ -1,7 +1,16 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
-from app.auth import get_current_user, supabase_admin_client
+from fastapi.responses import StreamingResponse
+from app.auth import get_current_user, require_console_admin, supabase_admin_client
+from pydantic import BaseModel
+from typing import List
+import io
+import csv
+import datetime
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+class BulkDeleteUsersPayload(BaseModel):
+    ids: List[str]
 
 def normalize_phone(phone: str) -> str:
     if not phone:
@@ -36,6 +45,48 @@ async def list_users(
         "page": page,
         "limit": limit
     }
+
+@router.get("/export")
+async def export_users(current_user: dict = Depends(require_console_admin)):
+    try:
+        res = supabase_admin_client.table("users").select("*").order("created_at", desc=True).execute()
+        users_list = res.data or []
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        writer.writerow(["id", "user_name", "mobile_number", "whatsapp_verified", "created_at", "updated_at"])
+        
+        for user in users_list:
+            writer.writerow([
+                user.get("id"),
+                user.get("user_name") or "",
+                user.get("mobile_number") or "",
+                "true" if user.get("whatsapp_verified") else "false",
+                user.get("created_at"),
+                user.get("updated_at")
+            ])
+            
+        output.seek(0)
+        filename = f"users-{datetime.date.today().isoformat()}.csv"
+        
+        return StreamingResponse(
+            output,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to export users: {str(e)}")
+
+@router.delete("")
+async def delete_users(payload: BulkDeleteUsersPayload, current_user: dict = Depends(require_console_admin)):
+    if not payload.ids:
+        raise HTTPException(status_code=400, detail="No users selected.")
+    try:
+        supabase_admin_client.table("users").delete().in_("id", payload.ids).execute()
+        return {"status": "success", "message": f"Successfully deleted {len(payload.ids)} user records."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete user records: {str(e)}")
 
 @router.get("/{id}")
 async def get_user_detail(id: str, current_user: dict = Depends(get_current_user)):

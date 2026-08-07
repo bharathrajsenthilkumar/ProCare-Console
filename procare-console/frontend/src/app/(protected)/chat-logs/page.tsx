@@ -8,18 +8,13 @@ import {
   ChevronLeft, 
   ChevronRight, 
   X, 
-  Filter, 
   Calendar, 
-  Clock, 
-  Sparkles, 
   AlertCircle,
-  Database,
-  ArrowRight,
+  Download,
+  Trash2,
+  AlertTriangle,
   User,
-  Bot,
-  Layers,
-  HelpCircle,
-  TrendingUp
+  Bot
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -80,6 +75,14 @@ export default function ChatLogsPage() {
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
+  // Selection, Delete & Export States
+  const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isCleanupOpen, setIsCleanupOpen] = useState(false);
+  const [cleanupDays, setCleanupDays] = useState<number>(30);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+
   // Debounce search input (400ms delay)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -95,52 +98,51 @@ export default function ChatLogsPage() {
   }, [channel, startDate, endDate]);
 
   // Fetch Chat Sessions
-  useEffect(() => {
-    async function fetchSessions() {
-      if (!session) return;
-      setLoading(true);
-      setError(null);
+  const fetchSessions = async () => {
+    if (!session) return;
+    setLoading(true);
+    setError(null);
+    setSelectedSessionIds([]); // Reset checkbox selection on reload
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
-      let url = `${apiUrl}/chat-logs?page=${page}&limit=${limit}`;
-      
-      if (debouncedSearch) {
-        url += `&search=${encodeURIComponent(debouncedSearch)}`;
-      }
-      if (channel) {
-        url += `&channel=${encodeURIComponent(channel)}`;
-      }
-      if (startDate) {
-        // Convert local date to start-of-day ISO string
-        url += `&start_date=${encodeURIComponent(new Date(startDate).toISOString())}`;
-      }
-      if (endDate) {
-        // Convert local date to end-of-day ISO string
-        const dateEnd = new Date(endDate);
-        dateEnd.setHours(23, 59, 59, 999);
-        url += `&end_date=${encodeURIComponent(dateEnd.toISOString())}`;
-      }
-
-      try {
-        const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setSessions(data.sessions);
-          setTotal(data.total);
-        } else {
-          setError('Failed to retrieve chatbot conversations.');
-        }
-      } catch (err) {
-        setError('Network error: Unable to reach backend server.');
-      } finally {
-        setLoading(false);
-      }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+    let url = `${apiUrl}/chat-logs?page=${page}&limit=${limit}`;
+    
+    if (debouncedSearch) {
+      url += `&search=${encodeURIComponent(debouncedSearch)}`;
+    }
+    if (channel) {
+      url += `&channel=${encodeURIComponent(channel)}`;
+    }
+    if (startDate) {
+      url += `&start_date=${encodeURIComponent(new Date(startDate).toISOString())}`;
+    }
+    if (endDate) {
+      const dateEnd = new Date(endDate);
+      dateEnd.setHours(23, 59, 59, 999);
+      url += `&end_date=${encodeURIComponent(dateEnd.toISOString())}`;
     }
 
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSessions(data.sessions);
+        setTotal(data.total);
+      } else {
+        setError('Failed to retrieve chatbot conversations.');
+      }
+    } catch (err) {
+      setError('Network error: Unable to reach backend server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSessions();
   }, [session, page, debouncedSearch, channel, startDate, endDate]);
 
@@ -177,8 +179,125 @@ export default function ChatLogsPage() {
     fetchTranscript();
   }, [selectedSessionId, session]);
 
+  const handleSelectSession = (id: string) => {
+    setSelectedSessionIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedSessionIds.length === sessions.length) {
+      setSelectedSessionIds([]);
+    } else {
+      setSelectedSessionIds(sessions.map((s) => s.session_id));
+    }
+  };
+
+  const handleExportCSV = async () => {
+    if (!session) return;
+    setExportLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+      const response = await fetch(`${apiUrl}/chat-logs/export`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat-logs-export-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert('Failed to export chatbot logs.');
+      }
+    } catch (err) {
+      alert('Network error while exporting chatbot logs.');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (!session || selectedSessionIds.length === 0) return;
+    setDeleteLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+      const response = await fetch(`${apiUrl}/chat-logs`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ session_ids: selectedSessionIds }),
+      });
+      if (response.ok) {
+        setSelectedSessionIds([]);
+        setIsDeleteConfirmOpen(false);
+        fetchSessions();
+      } else {
+        alert('Failed to delete selected chatbot sessions.');
+      }
+    } catch (err) {
+      alert('Network error while deleting chatbot logs.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleCleanupOldLogs = async () => {
+    if (!session) return;
+    setDeleteLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+      const response = await fetch(`${apiUrl}/chat-logs/cleanup?days=${cleanupDays}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      if (response.ok) {
+        const resData = await response.json();
+        alert(resData.message || 'Cleanup completed successfully.');
+        setIsCleanupOpen(false);
+        fetchSessions();
+      } else {
+        alert('Failed to clean up old chatbot logs.');
+      }
+    } catch (err) {
+      alert('Network error while cleaning up old chatbot logs.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   // Columns configuration for conversations table
   const columns: Column<ChatSession>[] = [
+    {
+      header: (
+        <input
+          type="checkbox"
+          checked={sessions.length > 0 && selectedSessionIds.length === sessions.length}
+          onChange={handleSelectAll}
+          className="rounded border-slate-300 text-slate-800 focus:ring-slate-500 w-4 h-4 cursor-pointer"
+        />
+      ),
+      accessor: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedSessionIds.includes(row.session_id)}
+          onChange={() => handleSelectSession(row.session_id)}
+          className="rounded border-slate-300 text-slate-800 focus:ring-slate-500 w-4 h-4 cursor-pointer"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ),
+      className: 'w-12 text-center',
+    },
     {
       header: 'Session ID',
       accessor: (row) => (
@@ -249,8 +368,40 @@ export default function ChatLogsPage() {
         title="Chatbot Exchange Transcripts" 
         description="Review historical dialogue sessions, triage intents, and patient-chatbot messaging scores."
         actions={
-          <div className="text-xs text-slate-500 font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs">
-            Conversations: <span className="text-slate-800">{total}</span>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={exportLoading || sessions.length === 0}
+              className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs"
+            >
+              <Download className="w-4 h-4 mr-1.5" />
+              {exportLoading ? 'Exporting...' : 'Export CSV'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCleanupOpen(true)}
+              className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs"
+            >
+              <Trash2 className="w-4 h-4 mr-1.5" />
+              Manual Cleanup
+            </Button>
+            {selectedSessionIds.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsDeleteConfirmOpen(true)}
+                className="bg-rose-50 border-rose-200 hover:bg-rose-100 text-rose-700 shadow-xs"
+              >
+                <Trash2 className="w-4 h-4 mr-1.5" />
+                Delete Selected ({selectedSessionIds.length})
+              </Button>
+            )}
+            <div className="text-xs text-slate-500 font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center">
+              Conversations: <span className="text-slate-800 ml-1">{total}</span>
+            </div>
           </div>
         }
       />
@@ -383,6 +534,77 @@ export default function ChatLogsPage() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Manual Delete Confirmation Dialog */}
+      {isDeleteConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs" onClick={() => setIsDeleteConfirmOpen(false)} />
+          <div className="bg-white border border-slate-200 shadow-xl rounded-2xl w-full max-w-md flex flex-col relative z-10 p-6 animate-scale-in">
+            <div className="flex items-center gap-3 text-rose-600 mb-4">
+              <AlertTriangle className="h-6 w-6" />
+              <h3 className="text-base font-bold">Delete Selected Chatbot Logs?</h3>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+              This action permanently deletes all messages belonging to the <strong className="text-slate-800">{selectedSessionIds.length}</strong> selected chatbot dialogue sessions. This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setIsDeleteConfirmOpen(false)} disabled={deleteLoading}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleDeleteSelected} 
+                disabled={deleteLoading}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-semibold border-rose-600 focus:ring-rose-500"
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete Permanently'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Date-Based Manual Cleanup Modal */}
+      {isCleanupOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs" onClick={() => setIsCleanupOpen(false)} />
+          <div className="bg-white border border-slate-200 shadow-xl rounded-2xl w-full max-w-md flex flex-col relative z-10 p-6 animate-scale-in">
+            <div className="flex items-center gap-3 text-rose-600 mb-4">
+              <AlertTriangle className="h-6 w-6" />
+              <h3 className="text-base font-bold">Manual Cleanup Chatbot Logs</h3>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed mb-4">
+              Specify the minimum age of chat log records to target for cleanup. This operation deletes all historical messages older than your select window permanently.
+            </p>
+            
+            <div className="space-y-1.5 mb-6">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Logs Age</label>
+              <select
+                value={cleanupDays}
+                onChange={(e) => setCleanupDays(parseInt(e.target.value) || 30)}
+                className="block w-full border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-850 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
+              >
+                <option value={7}>Older than 7 days</option>
+                <option value={30}>Older than 30 days</option>
+                <option value={90}>Older than 90 days</option>
+                <option value={180}>Older than 180 days</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setIsCleanupOpen(false)} disabled={deleteLoading}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCleanupOldLogs} 
+                disabled={deleteLoading}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-semibold border-rose-600 focus:ring-rose-500"
+              >
+                {deleteLoading ? 'Clearing...' : 'Clean Logs'}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 

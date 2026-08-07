@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard,
+  Calendar,
   Users,
   MessageSquare,
   FileText,
@@ -41,6 +42,7 @@ export default function ProtectedLayout({
 
   const navigation: NavItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Appointments', href: '/appointments', icon: Calendar },
     { name: 'Users', href: '/users', icon: Users },
     { name: 'Chat Logs', href: '/chat-logs', icon: MessageSquare },
     {

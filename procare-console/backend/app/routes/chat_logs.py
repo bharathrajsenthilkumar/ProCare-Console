@@ -1,7 +1,17 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
-from app.auth import get_current_user, supabase_admin_client
+from fastapi.responses import StreamingResponse
+from app.auth import get_current_user, require_console_admin, supabase_admin_client
+from pydantic import BaseModel
+from typing import List
+import io
+import csv
+import datetime
 
 router = APIRouter(prefix="/chat-logs", tags=["chat-logs"])
+
+class BulkDeleteLogsPayload(BaseModel):
+    session_ids: List[str]
+
 
 def normalize_phone(phone: str) -> str:
     if not phone:
@@ -125,6 +135,64 @@ async def list_chat_sessions(
         "page": page,
         "limit": limit
     }
+
+@router.get("/export")
+async def export_chat_logs(current_user: dict = Depends(require_console_admin)):
+    try:
+        res = supabase_admin_client.table("chatbot_logs").select("*").order("created_at", desc=True).execute()
+        logs = res.data or []
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        writer.writerow(["id", "session_id", "channel", "user_name", "user_mobile_number", "user_input", "ai_response", "response_time_ms", "created_at"])
+        
+        for log in logs:
+            writer.writerow([
+                log.get("id"),
+                log.get("session_id"),
+                log.get("channel"),
+                log.get("user_name") or "",
+                log.get("user_mobile_number") or "",
+                log.get("user_input") or "",
+                log.get("ai_response") or "",
+                log.get("response_time_ms") or 0,
+                log.get("created_at")
+            ])
+            
+        output.seek(0)
+        filename = f"chat-logs-{datetime.date.today().isoformat()}.csv"
+        
+        return StreamingResponse(
+            output,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to export chatbot logs: {str(e)}")
+
+@router.delete("")
+async def delete_chat_logs(payload: BulkDeleteLogsPayload, current_user: dict = Depends(require_console_admin)):
+    if not payload.session_ids:
+        raise HTTPException(status_code=400, detail="No chatbot sessions selected.")
+    try:
+        supabase_admin_client.table("chatbot_logs").delete().in_("session_id", payload.session_ids).execute()
+        return {"status": "success", "message": f"Successfully deleted {len(payload.session_ids)} chatbot sessions."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete chatbot sessions: {str(e)}")
+
+@router.delete("/cleanup")
+async def cleanup_old_chat_logs(
+    days: int = Query(..., ge=1),
+    current_user: dict = Depends(require_console_admin)
+):
+    try:
+        cutoff_date = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)).isoformat()
+        res = supabase_admin_client.table("chatbot_logs").delete().lt("created_at", cutoff_date).execute()
+        deleted_count = len(res.data) if res.data else 0
+        return {"status": "success", "message": f"Successfully deleted {deleted_count} logs older than {days} days."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to clean up old chatbot logs: {str(e)}")
 
 @router.get("/{session_id}")
 async def get_session_detail(session_id: str, current_user: dict = Depends(get_current_user)):

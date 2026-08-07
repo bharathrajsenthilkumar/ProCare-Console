@@ -7,22 +7,18 @@ import {
   MessageSquare, 
   Image as ImageIcon, 
   UserCheck, 
-  Activity, 
   Server, 
-  CheckCircle2, 
-  XCircle,
-  Database,
-  Calendar,
-  ArrowRight,
-  Clock,
   ExternalLink,
-  MessageCircle,
-  CheckCircle,
-  Info
+  Info,
+  RefreshCw,
+  AlertCircle,
+  HardDrive,
+  Database,
+  ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
@@ -34,20 +30,77 @@ interface Stats {
   team_members: number;
 }
 
-interface MockConversation {
-  id: string;
-  user_email: string;
-  time: string;
-  status: 'active' | 'completed' | 'triage';
-  messages: number;
+interface ChatSession {
+  session_id: string;
+  user_name: string | null;
+  user_mobile_number: string | null;
+  channel: string;
+  message_count: number;
+  latest_message_timestamp: string;
+  average_response_time: number;
 }
 
-interface MockActivity {
-  id: string;
-  event: string;
-  category: 'system' | 'staff' | 'gallery' | 'security';
-  time: string;
+interface StorageBucketMetrics {
+  name: string;
+  file_count: number;
+  total_bytes: number;
+  total_formatted: string;
 }
+
+interface StorageMetrics {
+  total_bytes: number;
+  total_formatted: string;
+  total_files_stored: number;
+  buckets: StorageBucketMetrics[];
+  database_size_available: boolean;
+  database_size_bytes: number;
+  database_size_formatted: string;
+  database_capacity_bytes: number;
+  database_capacity_formatted: string;
+  database_remaining_bytes: number;
+  database_remaining_formatted: string;
+  database_usage_percentage: number;
+  storage_capacity_bytes: number;
+  storage_capacity_formatted: string;
+  storage_used_bytes: number;
+  storage_used_formatted: string;
+  storage_remaining_bytes: number;
+  storage_remaining_formatted: string;
+  storage_usage_percentage: number;
+}
+
+const CircularProgress = ({ percentage, strokeColor }: { percentage: number; strokeColor: string }) => {
+  const radius = 32;
+  const strokeWidth = 6;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (Math.min(Math.max(percentage, 0), 100) / 100) * circumference;
+
+  return (
+    <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 80 80">
+      {/* Background circle */}
+      <circle
+        cx="40"
+        cy="40"
+        r={radius}
+        className="stroke-slate-100"
+        strokeWidth={strokeWidth}
+        fill="transparent"
+      />
+      {/* Progress circle */}
+      <circle
+        cx="40"
+        cy="40"
+        r={radius}
+        className={strokeColor}
+        strokeWidth={strokeWidth}
+        fill="transparent"
+        strokeDasharray={circumference}
+        strokeDashoffset={strokeDashoffset}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
 
 export default function DashboardPage() {
   const { session } = useAuth();
@@ -59,12 +112,43 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [conversations, setConversations] = useState<ChatSession[]>([]);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
+  const [conversationsError, setConversationsError] = useState<string | null>(null);
+
+  const [storageMetrics, setStorageMetrics] = useState<StorageMetrics | null>(null);
+  const [storageLoading, setStorageLoading] = useState(true);
+  const [storageError, setStorageError] = useState<string | null>(null);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+
+  const fetchStorageMetrics = async () => {
+    if (!session) return;
+    setStorageLoading(true);
+    setStorageError(null);
+    try {
+      const response = await fetch(`${apiUrl}/storage/metrics`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStorageMetrics(data);
+      } else {
+        setStorageError('Unable to load usage metrics');
+      }
+    } catch (error) {
+      console.error('Error fetching storage metrics on dashboard:', error);
+      setStorageError('Unable to load usage metrics');
+    } finally {
+      setStorageLoading(false);
+    }
+  };
 
   useEffect(() => {
     async function verifyBackendAndFetchStats() {
       if (!session) return;
-      
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       
       try {
         const response = await fetch(`${apiUrl}/stats`, {
@@ -88,8 +172,38 @@ export default function DashboardPage() {
       }
     }
 
+    async function fetchRecentConversations() {
+      if (!session) return;
+      setConversationsLoading(true);
+      setConversationsError(null);
+      try {
+        const response = await fetch(`${apiUrl}/chat-logs?page=1&limit=4`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setConversations(data.sessions || []);
+        } else {
+          setConversationsError('Failed to fetch recent chatbot sessions.');
+        }
+      } catch (error) {
+        console.error('Error fetching chat logs:', error);
+        setConversationsError('Unable to connect to chat logs service.');
+      } finally {
+        setConversationsLoading(false);
+      }
+    }
+
     verifyBackendAndFetchStats();
+    fetchRecentConversations();
+    fetchStorageMetrics();
   }, [session]);
+
+  const refreshAllDashboardData = () => {
+    fetchStorageMetrics();
+  };
 
   const cards = [
     {
@@ -122,91 +236,61 @@ export default function DashboardPage() {
     },
   ];
 
-  // Mock Conversations (Phase 1A design requirement)
-  const mockConversations: MockConversation[] = [
-    { id: '1', user_email: 'j.miller@patient.com', time: '10 mins ago', status: 'triage', messages: 6 },
-    { id: '2', user_email: 's.adams@patient.com', time: '42 mins ago', status: 'active', messages: 4 },
-    { id: '3', user_email: 'anonymous_user_44', time: '2 hours ago', status: 'completed', messages: 12 },
-    { id: '4', user_email: 'k.taylor@patient.com', time: '4 hours ago', status: 'completed', messages: 8 },
-  ];
-
-  const conversationColumns: Column<MockConversation>[] = [
+  const conversationColumns: Column<ChatSession>[] = [
     {
       header: 'Patient Identity',
-      accessor: (row) => (
-        <div className="font-semibold text-slate-800 flex items-center gap-2">
-          <div className="h-2 w-2 bg-slate-300 rounded-full" />
-          <span>{row.user_email}</span>
-        </div>
-      ),
+      accessor: (row) => {
+        const name = row.user_name && row.user_name !== 'N/A' ? row.user_name : null;
+        const mobile = row.user_mobile_number && row.user_mobile_number !== 'N/A' ? row.user_mobile_number : null;
+        const identity = name || mobile || `Session ${row.session_id.substring(0, 8)}`;
+        return (
+          <div className="font-semibold text-slate-800 flex items-center gap-2">
+            <div className="h-2 w-2 bg-slate-300 rounded-full" />
+            <span>{identity}</span>
+          </div>
+        );
+      },
     },
     {
-      header: 'Session Status',
+      header: 'Session Channel',
       accessor: (row) => {
-        const variants = {
-          active: 'info' as const,
-          completed: 'default' as const,
-          triage: 'warning' as const,
-        };
-        const labels = {
-          active: 'In Progress',
-          completed: 'Resolved',
-          triage: 'Awaiting Doctor',
-        };
-        return <Badge variant={variants[row.status]}>{labels[row.status]}</Badge>;
+        const isWhatsapp = row.channel.toLowerCase() === 'whatsapp';
+        return (
+          <Badge variant={isWhatsapp ? 'success' : 'info'}>
+            {isWhatsapp ? 'WHATSAPP' : 'WEBCHAT'}
+          </Badge>
+        );
       },
     },
     {
       header: 'Exchange count',
-      accessor: (row) => `${row.messages} messages`,
+      accessor: (row) => `${row.message_count} messages`,
       className: 'text-slate-500',
     },
     {
       header: 'Recorded time',
-      accessor: 'time',
+      accessor: (row) => {
+        try {
+          const date = new Date(row.latest_message_timestamp);
+          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch {
+          return 'Just now';
+        }
+      },
       className: 'text-slate-400 font-medium',
     },
     {
       header: 'Audit link',
-      accessor: () => (
-        <Link href="/chat-logs" className="text-sky-600 hover:text-sky-800 inline-flex items-center gap-1 text-xs font-semibold">
+      accessor: (row) => (
+        <Link 
+          href={`/chat-logs?session_id=${row.session_id}`}
+          className="text-sky-600 hover:text-sky-800 inline-flex items-center gap-1 text-xs font-semibold"
+        >
           <span>Transcript</span>
           <ExternalLink className="h-3 w-3" />
         </Link>
       ),
       className: 'text-right',
-    },
-  ];
-
-  // Mock System Activity (Phase 1A design requirement)
-  const mockActivities: MockActivity[] = [
-    { id: '1', event: 'Dr. Sarah Adams profile updated', category: 'staff', time: '35 mins ago' },
-    { id: '2', event: 'New clinic entry uploaded: lobby_view.jpg', category: 'gallery', time: '1 hour ago' },
-    { id: '3', event: 'Database automated replication successful', category: 'system', time: '3 hours ago' },
-    { id: '4', event: 'Admin credentials login verified (admin@procare.com)', category: 'security', time: '4 hours ago' },
-  ];
-
-  const activityColumns: Column<MockActivity>[] = [
-    {
-      header: 'System Event',
-      accessor: (row) => <span className="font-medium text-slate-700">{row.event}</span>,
-    },
-    {
-      header: 'Category',
-      accessor: (row) => {
-        const variants = {
-          system: 'default' as const,
-          staff: 'info' as const,
-          gallery: 'success' as const,
-          security: 'warning' as const,
-        };
-        return <Badge variant={variants[row.category]}>{row.category.toUpperCase()}</Badge>;
-      },
-    },
-    {
-      header: 'Timestamp',
-      accessor: 'time',
-      className: 'text-slate-400 text-xs font-medium',
     },
   ];
 
@@ -226,6 +310,29 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      {/* Database Quota Warning Banner (>= 90% usage) */}
+      {storageMetrics && storageMetrics.database_usage_percentage >= 90 && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex gap-3 text-rose-800 animate-fade-in">
+          <AlertCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="font-bold text-rose-900 text-sm">Database Storage Warning</h4>
+            <p className="text-xs text-rose-700 leading-relaxed font-semibold">
+              Database storage is almost full. Export and manually delete unnecessary data.
+            </p>
+            <p className="text-[11px] text-rose-600 leading-relaxed">
+              Database usage has reached <strong>{storageMetrics.database_usage_percentage.toFixed(1)}%</strong> of the available quota. Used: <strong>{storageMetrics.database_size_formatted}</strong> of <strong>{storageMetrics.database_capacity_formatted}</strong>.
+            </p>
+            <div className="pt-2 flex gap-2">
+              <Link href="/storage">
+                <Button size="sm" className="bg-rose-600 hover:bg-rose-700 text-white font-semibold border-rose-600 px-3 py-1.5 h-8 text-xs rounded-lg shadow-xs cursor-pointer">
+                  Manage Storage
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Info notice about Mock data */}
       <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3 text-xs text-sky-800 leading-relaxed font-medium">
@@ -287,39 +394,172 @@ export default function DashboardPage() {
               </Link>
             </div>
             <div className="p-5">
-              <DataTable 
-                columns={conversationColumns} 
-                data={mockConversations} 
-                keyExtractor={(row) => row.id} 
-              />
+              {conversationsLoading ? (
+                <div className="h-48 flex items-center justify-center text-slate-400 text-xs font-medium gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Retrieving recent sessions...
+                </div>
+              ) : conversationsError ? (
+                <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <span>{conversationsError}</span>
+                </div>
+              ) : conversations.length === 0 ? (
+                <div className="h-48 flex flex-col items-center justify-center text-slate-400 text-center gap-2 p-6">
+                  <MessageSquare className="w-8 h-8 text-slate-300 stroke-[1.5]" />
+                  <span className="text-xs font-semibold text-slate-500">No Chatbot Sessions Found</span>
+                  <span className="text-[10px] max-w-xs text-slate-400">All patient conversations and diagnostics transcripts will be displayed here once sessions are recorded.</span>
+                </div>
+              ) : (
+                <DataTable 
+                  columns={conversationColumns} 
+                  data={conversations} 
+                  keyExtractor={(row) => row.session_id} 
+                />
+              )}
             </div>
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div>
-          <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden h-full flex flex-col justify-between">
-            <div>
-              <div className="p-5 border-b border-slate-100">
-                <h3 className="text-sm font-bold text-slate-800 tracking-tight">Console Activity Log</h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">Audit history of changes made by administrative operators.</p>
+        {/* Storage & Database Usage */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-800 tracking-tight">Storage & Database Usage</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">Real-time resource quota and capacity monitoring.</p>
               </div>
-              <div className="p-5">
-                <DataTable 
-                  columns={activityColumns} 
-                  data={mockActivities} 
-                  keyExtractor={(row) => row.id} 
-                />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={refreshAllDashboardData}
+                disabled={storageLoading}
+                className="h-8 w-8 p-0 hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <RefreshCw className={`h-4 w-4 ${storageLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
+
+            {storageLoading ? (
+              <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-xs font-medium gap-2">
+                <RefreshCw className="w-5 h-5 animate-spin" />
+                <span>Loading usage metrics...</span>
               </div>
-            </div>
-            <div className="p-5 bg-slate-50/50 border-t border-slate-100">
-              <Link href="/logs">
-                <Button variant="outline" size="sm" className="w-full justify-center">
-                  <Clock className="h-3.5 w-3.5 mr-2" />
-                  <span>Full Diagnostics Log</span>
-                </Button>
-              </Link>
-            </div>
+            ) : storageError ? (
+              <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <span>{storageError}</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Circular Charts Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+                  {/* Supabase Storage Card */}
+                  <div className="border border-slate-150 rounded-xl p-4 flex flex-col items-center justify-between bg-slate-50/50 hover:bg-slate-50/80 transition-all duration-300">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center block mb-3">Supabase Storage</span>
+                    
+                    <div className="relative flex items-center justify-center mb-3">
+                      <CircularProgress 
+                        percentage={storageMetrics?.storage_usage_percentage || 0} 
+                        strokeColor="stroke-sky-500" 
+                      />
+                      <div className="absolute flex flex-col items-center justify-center text-center">
+                        <span className="text-xs font-bold text-slate-800">
+                          {storageMetrics?.storage_usage_percentage.toFixed(1)}%
+                        </span>
+                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Used</span>
+                      </div>
+                    </div>
+
+                    <div className="text-[10px] text-slate-500 w-full space-y-1 pt-2 border-t border-slate-150">
+                      <div className="flex justify-between">
+                        <span>Used:</span>
+                        <span className="font-semibold text-slate-700">{storageMetrics?.storage_used_formatted}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Remaining:</span>
+                        <span className="font-semibold text-slate-700">{storageMetrics?.storage_remaining_formatted}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Capacity:</span>
+                        <span className="font-semibold text-slate-700">{storageMetrics?.storage_capacity_formatted}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Supabase Database Card */}
+                  <div className={`border rounded-xl p-4 flex flex-col items-center justify-between transition-all duration-300 ${
+                    storageMetrics && storageMetrics.database_usage_percentage >= 90 
+                      ? 'border-rose-250 bg-rose-50/20 hover:bg-rose-50/40' 
+                      : 'border-slate-150 bg-slate-50/50 hover:bg-slate-50/80'
+                  }`}>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center block mb-3">Supabase Database</span>
+                    
+                    <div className="relative flex items-center justify-center mb-3">
+                      <CircularProgress 
+                        percentage={storageMetrics?.database_usage_percentage || 0} 
+                        strokeColor={storageMetrics && storageMetrics.database_usage_percentage >= 90 ? "stroke-rose-500" : "stroke-violet-500"} 
+                      />
+                      <div className="absolute flex flex-col items-center justify-center text-center">
+                        <span className="text-xs font-bold text-slate-800">
+                          {storageMetrics?.database_usage_percentage.toFixed(1)}%
+                        </span>
+                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Used</span>
+                      </div>
+                    </div>
+
+                    {storageMetrics && storageMetrics.database_usage_percentage >= 90 && (
+                      <span className="text-[9px] font-bold text-rose-600 uppercase mb-2 flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5" /> Storage Warning
+                      </span>
+                    )}
+
+                    <div className="text-[10px] text-slate-500 w-full space-y-1 pt-2 border-t border-slate-150">
+                      <div className="flex justify-between">
+                        <span>Used:</span>
+                        <span className="font-semibold text-slate-700">
+                          {storageMetrics?.database_size_available ? storageMetrics.database_size_formatted : 'Unavailable'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Remaining:</span>
+                        <span className="font-semibold text-slate-700">
+                          {storageMetrics?.database_size_available ? storageMetrics.database_remaining_formatted : 'Unavailable'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Capacity:</span>
+                        <span className="font-semibold text-slate-700">{storageMetrics?.database_capacity_formatted}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Storage Bucket summaries */}
+                {storageMetrics && storageMetrics.buckets && (
+                  <div className="pt-4 border-t border-slate-100 space-y-2">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Storage Buckets Summary</span>
+                    <div className="space-y-1.5">
+                      {storageMetrics.buckets.map((bucket) => (
+                        <div key={bucket.name} className="flex items-center justify-between text-[11px] p-2 bg-slate-50/50 rounded-lg border border-slate-100">
+                          <span className="font-mono text-slate-600 font-semibold">{bucket.name}</span>
+                          <span className="text-slate-500 font-medium">{bucket.file_count} files • {bucket.total_formatted}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom link to storage metrics */}
+                <div className="pt-2">
+                  <Link href="/storage">
+                    <Button variant="outline" size="sm" className="w-full justify-center text-xs font-semibold">
+                      <HardDrive className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                      <span>Full Storage Metrics Dashboard</span>
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

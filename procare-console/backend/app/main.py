@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app.config import settings
-from app.routes import health, stats, users, chat_logs
+from app.routes import health, stats, users, chat_logs, gallery, team, storage, appointments
 
 app = FastAPI(
     title="Procare Console API",
@@ -33,6 +33,11 @@ app.include_router(health.router, prefix="/api/v1")
 app.include_router(stats.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(chat_logs.router, prefix="/api/v1")
+app.include_router(gallery.router, prefix="/api/v1")
+app.include_router(team.router, prefix="/api/v1")
+app.include_router(storage.router, prefix="/api/v1")
+app.include_router(appointments.router, prefix="/api/v1")
+
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
