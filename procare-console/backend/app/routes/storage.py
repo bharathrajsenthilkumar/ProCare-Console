@@ -73,6 +73,9 @@ async def get_storage_metrics(current_user: dict = Depends(get_current_user)):
             database_table_available = True
             for table in res.data:
                 table_name = table.get("table_name")
+                if table_name == "whatsapp_sessions":
+                    continue
+                
                 row_count = table.get("row_count", 0)
                 data_bytes = table.get("data_size_bytes", 0)
                 index_bytes = table.get("index_size_bytes", 0)
@@ -90,6 +93,32 @@ async def get_storage_metrics(current_user: dict = Depends(get_current_user)):
                     "index_size_formatted": format_size(index_bytes),
                     "total_size_formatted": format_size(total_bytes_val)
                 })
+
+            # Fetch actual row count for system_logs
+            system_logs_row_count = 0
+            try:
+                log_count_res = supabase_admin_client.table("system_logs").select("id", count="exact").limit(1).execute()
+                system_logs_row_count = log_count_res.count or 0
+            except Exception as ex:
+                print("Error fetching row count for system_logs:", ex)
+            
+            # Estimate/calculate database relation sizing block values for system_logs
+            sys_data_bytes = 16384 + (system_logs_row_count * 512)
+            sys_index_bytes = 16384 + (system_logs_row_count * 128)
+            sys_total_bytes = sys_data_bytes + sys_index_bytes
+            
+            database_table_storage_total_bytes += sys_total_bytes
+            
+            database_tables.append({
+                "table_name": "system_logs",
+                "row_count": system_logs_row_count,
+                "data_size_bytes": sys_data_bytes,
+                "index_size_bytes": sys_index_bytes,
+                "total_size_bytes": sys_total_bytes,
+                "data_size_formatted": format_size(sys_data_bytes),
+                "index_size_formatted": format_size(sys_index_bytes),
+                "total_size_formatted": format_size(sys_total_bytes)
+            })
     except Exception as e:
         print("Database table metrics RPC not available:", e)
         database_table_available = False

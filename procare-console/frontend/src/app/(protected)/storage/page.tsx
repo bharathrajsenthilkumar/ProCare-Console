@@ -530,10 +530,35 @@ export default function StoragePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {metrics.database_tables.map((table) => {
                     const isChatbotLogs = table.table_name === 'chatbot_logs';
-                    return (
+                    const isSystemLogs = table.table_name === 'system_logs';
+                    const isHighlighted = isChatbotLogs || isSystemLogs;
+                    
+                    const getTableLink = (tableName: string) => {
+                      switch (tableName) {
+                        case 'users':
+                          return '/users';
+                        case 'chatbot_logs':
+                          return '/chat-logs';
+                        case 'system_logs':
+                          return '/logs';
+                        case 'appointments':
+                          return '/appointments';
+                        case 'gallery_images':
+                          return '/gallery';
+                        case 'team_members':
+                          return '/team';
+                        default:
+                          return null;
+                      }
+                    };
+
+                    const link = getTableLink(table.table_name);
+
+                    const cardContent = (
                       <Card 
-                        key={table.table_name} 
-                        className={`border-slate-200 shadow-sm transition-all duration-300 ${isChatbotLogs ? 'ring-2 ring-violet-500/30' : ''}`}
+                        className={`border-slate-200 shadow-sm transition-all duration-300 ${
+                          isHighlighted ? 'ring-2 ring-violet-500/30' : ''
+                        } ${link ? 'hover:ring-2 hover:ring-sky-500/50 hover:cursor-pointer' : ''}`}
                       >
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-xs font-bold text-slate-800 flex items-center gap-2">
@@ -541,6 +566,7 @@ export default function StoragePage() {
                             <span className="font-mono text-slate-700">{table.table_name}</span>
                           </CardTitle>
                           {isChatbotLogs && <Badge variant="success">AUDIT LOGS</Badge>}
+                          {isSystemLogs && <Badge variant="info">SYSTEM LOGS</Badge>}
                         </CardHeader>
                         <CardContent className="space-y-3">
                           <div className="grid grid-cols-2 gap-2 text-xs">
@@ -567,6 +593,16 @@ export default function StoragePage() {
                         </CardContent>
                       </Card>
                     );
+
+                    if (link) {
+                      return (
+                        <Link key={table.table_name} href={link} className="block no-underline">
+                          {cardContent}
+                        </Link>
+                      );
+                    }
+
+                    return <div key={table.table_name}>{cardContent}</div>;
                   })}
                 </div>
               </div>

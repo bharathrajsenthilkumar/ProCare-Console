@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app.config import settings
-from app.routes import health, stats, users, chat_logs, gallery, team, storage, appointments
+from app.routes import health, stats, users, chat_logs, gallery, team, storage, appointments, system_logs
 
 app = FastAPI(
     title="Procare Console API",
@@ -37,6 +37,7 @@ app.include_router(gallery.router, prefix="/api/v1")
 app.include_router(team.router, prefix="/api/v1")
 app.include_router(storage.router, prefix="/api/v1")
 app.include_router(appointments.router, prefix="/api/v1")
+app.include_router(system_logs.router, prefix="/api/v1")
 
 
 if __name__ == "__main__":
