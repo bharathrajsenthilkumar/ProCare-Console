@@ -37,8 +37,15 @@ export default function ProtectedLayout({
 }) {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [logsDropdownOpen, setLogsDropdownOpen] = useState(true);
+
+  React.useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
 
   const navigation: NavItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },

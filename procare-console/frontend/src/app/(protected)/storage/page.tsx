@@ -296,7 +296,7 @@ export default function StoragePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Storage Usage Card */}
               <Card className="border-slate-200 shadow-sm overflow-hidden">
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="!p-6 !pb-8 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-sky-50 rounded-xl border border-sky-100 text-sky-600">
@@ -321,7 +321,7 @@ export default function StoragePage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 pb-2">
                     <div className="flex justify-between text-xs font-semibold text-slate-500">
                       <span>Usage Progress</span>
                       <span>{metrics?.storage_usage_percentage.toFixed(1)}%</span>
@@ -344,7 +344,7 @@ export default function StoragePage() {
               <Card className={`shadow-sm overflow-hidden border ${
                 metrics && metrics.database_usage_percentage >= 90 ? 'border-rose-200 bg-rose-50/5' : 'border-slate-200'
               }`}>
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="!p-6 !pb-8 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`p-2.5 rounded-xl border ${
@@ -377,7 +377,7 @@ export default function StoragePage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 pb-2">
                     <div className="flex justify-between text-xs font-semibold text-slate-500">
                       <span>Usage Progress</span>
                       <span>{metrics?.database_size_available ? `${metrics.database_usage_percentage.toFixed(1)}%` : '0%'}</span>
