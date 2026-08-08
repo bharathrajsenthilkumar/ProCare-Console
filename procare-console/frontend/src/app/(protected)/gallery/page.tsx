@@ -231,7 +231,7 @@ export default function GalleryPage() {
     {
       header: 'Preview',
       accessor: (row) => (
-        <div className="relative w-16 h-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+        <div className="relative w-16 h-12 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
           <img 
             src={row.image_path} 
             alt="Gallery preview" 
@@ -247,7 +247,7 @@ export default function GalleryPage() {
       header: 'File Name',
       accessor: (row) => {
         const filename = row.image_path.split('/').pop()?.split('?')[0] || 'Image';
-        return <span className="font-medium text-slate-700 truncate max-w-xs block">{decodeURIComponent(filename)}</span>;
+        return <span className="font-medium text-slate-700 dark:text-slate-200 truncate max-w-xs block">{decodeURIComponent(filename)}</span>;
       },
     },
     {
@@ -282,7 +282,7 @@ export default function GalleryPage() {
             variant="outline" 
             size="sm"
             onClick={() => openEditModal(row)}
-            className="h-8 px-2.5 text-slate-600 hover:text-slate-900"
+            className="h-8 px-2.5 text-slate-600 dark:text-slate-350 hover:text-slate-900 dark:hover:text-slate-100"
           >
             <Edit className="w-4 h-4 mr-1" /> Edit
           </Button>
@@ -290,7 +290,7 @@ export default function GalleryPage() {
             variant="outline" 
             size="sm"
             onClick={() => openDeleteModal(row)}
-            className="h-8 px-2.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100 hover:border-rose-200"
+            className="h-8 px-2.5 text-rose-600 dark:text-rose-450 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 border-rose-100 dark:border-rose-950 hover:border-rose-200 dark:hover:border-rose-900"
           >
             <Trash2 className="w-4 h-4 mr-1" /> Delete
           </Button>
@@ -343,7 +343,7 @@ export default function GalleryPage() {
         </Card>
       ) : (
         <Card className="border-slate-200 shadow-sm overflow-hidden">
-          <CardContent className="p-0">
+          <CardContent className="!p-6">
             <DataTable 
               data={items} 
               columns={columns} 
@@ -355,11 +355,11 @@ export default function GalleryPage() {
 
       {/* --- ADD MODAL --- */}
       {isAddOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-lg">Add Gallery Image</h3>
-              <button onClick={() => setIsAddOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+        <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Add Gallery Image</h3>
+              <button onClick={() => setIsAddOpen(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -372,16 +372,16 @@ export default function GalleryPage() {
                   </div>
                 )}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Select Image File</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Select Image File</label>
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-xl p-6 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-slate-100/50 flex flex-col items-center justify-center gap-2"
+                    className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 rounded-xl p-6 text-center cursor-pointer transition-colors bg-slate-50 dark:bg-slate-850/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 flex flex-col items-center justify-center gap-2"
                   >
                     <Upload className="w-8 h-8 text-slate-400" />
-                    <span className="text-sm font-semibold text-slate-600">
+                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
                       {selectedFile ? selectedFile.name : 'Click to Upload Image'}
                     </span>
-                    <span className="text-xs text-slate-400">Supports JPG, PNG, WEBP, GIF (Max 5MB)</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-550">Supports JPG, PNG, WEBP, GIF (Max 5MB)</span>
                   </div>
                   <input 
                     type="file" 
@@ -393,7 +393,7 @@ export default function GalleryPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Display Sequence</label>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Display Sequence</label>
                     <Input 
                       type="number" 
                       value={displayOrder}
@@ -402,9 +402,9 @@ export default function GalleryPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
-                    <div className="flex items-center h-10 border border-slate-200 rounded-lg px-3 bg-white">
-                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 font-medium">
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Status</label>
+                    <div className="flex items-center h-10 border border-slate-200 dark:border-slate-855 rounded-lg px-3 bg-white dark:bg-slate-950">
+                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 dark:text-slate-300 font-medium">
                         <input 
                           type="checkbox" 
                           checked={isActive}
@@ -417,7 +417,7 @@ export default function GalleryPage() {
                   </div>
                 </div>
               </div>
-              <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={actionLoading}>
                   {actionLoading ? 'Saving...' : 'Save Image'}
@@ -430,11 +430,11 @@ export default function GalleryPage() {
 
       {/* --- EDIT MODAL --- */}
       {isEditOpen && editItem && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-lg">Edit Gallery Item</h3>
-              <button onClick={() => setIsEditOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+        <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Edit Gallery Item</h3>
+              <button onClick={() => setIsEditOpen(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -448,20 +448,20 @@ export default function GalleryPage() {
                 )}
                 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Current Image</label>
-                  <div className="relative w-full h-32 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Current Image</label>
+                  <div className="relative w-full h-32 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-center">
                     <img src={editItem.image_path} className="w-full h-full object-cover" alt="Current" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Replace Image (Optional)</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Replace Image (Optional)</label>
                   <div 
                     onClick={() => editFileInputRef.current?.click()}
-                    className="border border-dashed border-slate-200 hover:border-slate-400 rounded-xl p-4 text-center cursor-pointer bg-slate-50 hover:bg-slate-100/50 flex flex-col items-center justify-center gap-1"
+                    className="border border-dashed border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 rounded-xl p-4 text-center cursor-pointer bg-slate-50 dark:bg-slate-850/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 flex flex-col items-center justify-center gap-1"
                   >
                     <Upload className="w-5 h-5 text-slate-400" />
-                    <span className="text-xs font-semibold text-slate-600">
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                       {selectedFile ? selectedFile.name : 'Click to Upload Replacement'}
                     </span>
                   </div>
@@ -476,7 +476,7 @@ export default function GalleryPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Display Sequence</label>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Display Sequence</label>
                     <Input 
                       type="number" 
                       value={displayOrder}
@@ -485,9 +485,9 @@ export default function GalleryPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
-                    <div className="flex items-center h-10 border border-slate-200 rounded-lg px-3 bg-white">
-                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 font-medium">
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Status</label>
+                    <div className="flex items-center h-10 border border-slate-200 dark:border-slate-855 rounded-lg px-3 bg-white dark:bg-slate-950">
+                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 dark:text-slate-300 font-medium">
                         <input 
                           type="checkbox" 
                           checked={isActive}
@@ -500,7 +500,7 @@ export default function GalleryPage() {
                   </div>
                 </div>
               </div>
-              <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={actionLoading}>
                   {actionLoading ? 'Updating...' : 'Update Details'}
@@ -513,23 +513,23 @@ export default function GalleryPage() {
 
       {/* --- DELETE CONFIRMATION --- */}
       {isDeleteOpen && editItem && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 text-center space-y-4">
-              <div className="w-12 h-12 bg-rose-50 border border-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-800 text-rose-600 rounded-full flex items-center justify-center mx-auto">
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-bold text-slate-800 text-lg">Remove Gallery Image?</h3>
-                <p className="text-sm text-slate-500">
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Remove Gallery Image?</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   This action is permanent. The image file will be permanently deleted from Supabase Storage and will no longer show on the homepage.
                 </p>
               </div>
-              <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-slate-200 mx-auto">
+              <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 mx-auto">
                 <img src={editItem.image_path} className="w-full h-full object-cover" alt="delete-preview" />
               </div>
             </div>
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
               <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
               <Button 
                 onClick={handleDeleteSubmit}

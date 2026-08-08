@@ -242,11 +242,16 @@ export default function DashboardPage() {
       accessor: (row) => {
         const name = row.user_name && row.user_name !== 'N/A' ? row.user_name : null;
         const mobile = row.user_mobile_number && row.user_mobile_number !== 'N/A' ? row.user_mobile_number : null;
-        const identity = name || mobile || `Session ${row.session_id.substring(0, 8)}`;
+        
         return (
-          <div className="font-semibold text-slate-800 flex items-center gap-2">
-            <div className="h-2 w-2 bg-slate-300 rounded-full" />
-            <span>{identity}</span>
+          <div className="space-y-0.5">
+            <div className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <div className="h-2 w-2 bg-slate-300 dark:bg-slate-700 rounded-full" />
+              <span>{name || mobile || `Session ${row.session_id.substring(0, 8)}`}</span>
+            </div>
+            {name && mobile && (
+              <div className="text-[10px] text-slate-400 dark:text-slate-400 pl-4">{mobile}</div>
+            )}
           </div>
         );
       },
@@ -265,7 +270,7 @@ export default function DashboardPage() {
     {
       header: 'Exchange count',
       accessor: (row) => `${row.message_count} messages`,
-      className: 'text-slate-500',
+      className: 'text-slate-500 dark:text-slate-400',
     },
     {
       header: 'Recorded time',
@@ -277,7 +282,7 @@ export default function DashboardPage() {
           return 'Just now';
         }
       },
-      className: 'text-slate-400 font-medium',
+      className: 'text-slate-400 dark:text-slate-500 font-medium',
     },
     {
       header: 'Audit link',
@@ -301,11 +306,11 @@ export default function DashboardPage() {
         title="Administrative Overview" 
         description="Console diagnostics status, resource summaries, and active chatbots exchanges."
         actions={
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-500 font-semibold shadow-xs">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-semibold shadow-xs">
             <Server className={`h-4 w-4 ${backendStatus === 'connected' ? 'text-emerald-500' : 'text-slate-400'}`} />
             <span>API Status:</span>
             {backendStatus === 'checking' && <span className="text-slate-400 animate-pulse">Scanning...</span>}
-            {backendStatus === 'connected' && <span className="text-emerald-600 font-bold">Online</span>}
+            {backendStatus === 'connected' && <span className="text-emerald-600 dark:text-emerald-400 font-bold">Online</span>}
             {backendStatus === 'error' && <span className="text-red-500 font-bold">Offline</span>}
           </div>
         }
@@ -334,16 +339,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Info notice about Mock data */}
-      <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3 text-xs text-sky-800 leading-relaxed font-medium">
-        <Info className="h-5 w-5 text-sky-600 shrink-0 mt-0.5" />
-        <div>
-          <p className="font-bold">Phase 1A Design System Blueprint</p>
-          <p className="mt-0.5 text-sky-700/90 font-normal">
-            The data metrics and records displayed below are mock indicators designed to simulate real operations. Database bindings will be integrated in Phase 2.
-          </p>
-        </div>
-      </div>
 
       {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -361,7 +356,7 @@ export default function DashboardPage() {
               {loading && backendStatus === 'checking' ? (
                 <div className="h-7 w-20 bg-slate-100 animate-pulse rounded" />
               ) : (
-                <div className="text-2xl font-bold text-slate-900 tracking-tight">{card.value}</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">{card.value}</div>
               )}
               <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">{card.description}</p>
               
@@ -383,11 +378,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Conversations */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-slate-800 tracking-tight">Recent Chatbot Sessions</h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">Live monitoring of patient interactions and automated support transcripts.</p>
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 tracking-tight">Recent Chatbot Sessions</h3>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Live monitoring of patient interactions and automated support transcripts.</p>
               </div>
               <Link href="/chat-logs">
                 <Button variant="secondary" size="sm">View All</Button>
@@ -422,11 +417,11 @@ export default function DashboardPage() {
 
         {/* Storage & Database Usage */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-5 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-slate-800 tracking-tight">Storage & Database Usage</h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">Real-time resource quota and capacity monitoring.</p>
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 tracking-tight">Storage & Database Usage</h3>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Real-time resource quota and capacity monitoring.</p>
               </div>
               <Button 
                 variant="ghost" 
@@ -454,8 +449,8 @@ export default function DashboardPage() {
                 {/* Circular Charts Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
                   {/* Supabase Storage Card */}
-                  <div className="border border-slate-150 rounded-xl p-4 flex flex-col items-center justify-between bg-slate-50/50 hover:bg-slate-50/80 transition-all duration-300">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center block mb-3">Supabase Storage</span>
+                  <div className="border border-slate-150 dark:border-slate-800 rounded-xl p-4 flex flex-col items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all duration-300">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-center block mb-3">Supabase Storage</span>
                     
                     <div className="relative flex items-center justify-center mb-3">
                       <CircularProgress 
@@ -463,25 +458,25 @@ export default function DashboardPage() {
                         strokeColor="stroke-sky-500" 
                       />
                       <div className="absolute flex flex-col items-center justify-center text-center">
-                        <span className="text-xs font-bold text-slate-800">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-205">
                           {storageMetrics?.storage_usage_percentage.toFixed(1)}%
                         </span>
-                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Used</span>
+                        <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Used</span>
                       </div>
                     </div>
 
-                    <div className="text-[10px] text-slate-500 w-full space-y-1 pt-2 border-t border-slate-150">
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 w-full space-y-1 pt-2 border-t border-slate-150 dark:border-slate-800">
                       <div className="flex justify-between">
                         <span>Used:</span>
-                        <span className="font-semibold text-slate-700">{storageMetrics?.storage_used_formatted}</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{storageMetrics?.storage_used_formatted}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Remaining:</span>
-                        <span className="font-semibold text-slate-700">{storageMetrics?.storage_remaining_formatted}</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{storageMetrics?.storage_remaining_formatted}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Capacity:</span>
-                        <span className="font-semibold text-slate-700">{storageMetrics?.storage_capacity_formatted}</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{storageMetrics?.storage_capacity_formatted}</span>
                       </div>
                     </div>
                   </div>
@@ -489,10 +484,10 @@ export default function DashboardPage() {
                   {/* Supabase Database Card */}
                   <div className={`border rounded-xl p-4 flex flex-col items-center justify-between transition-all duration-300 ${
                     storageMetrics && storageMetrics.database_usage_percentage >= 90 
-                      ? 'border-rose-250 bg-rose-50/20 hover:bg-rose-50/40' 
-                      : 'border-slate-150 bg-slate-50/50 hover:bg-slate-50/80'
+                      ? 'border-rose-250 bg-rose-50/20 dark:bg-rose-950/10 hover:bg-rose-50/40' 
+                      : 'border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
                   }`}>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center block mb-3">Supabase Database</span>
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-center block mb-3">Supabase Database</span>
                     
                     <div className="relative flex items-center justify-center mb-3">
                       <CircularProgress 
@@ -500,35 +495,35 @@ export default function DashboardPage() {
                         strokeColor={storageMetrics && storageMetrics.database_usage_percentage >= 90 ? "stroke-rose-500" : "stroke-violet-500"} 
                       />
                       <div className="absolute flex flex-col items-center justify-center text-center">
-                        <span className="text-xs font-bold text-slate-800">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-205">
                           {storageMetrics?.database_usage_percentage.toFixed(1)}%
                         </span>
-                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Used</span>
+                        <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Used</span>
                       </div>
                     </div>
 
                     {storageMetrics && storageMetrics.database_usage_percentage >= 90 && (
-                      <span className="text-[9px] font-bold text-rose-600 uppercase mb-2 flex items-center gap-1">
+                      <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase mb-2 flex items-center gap-1">
                         <AlertCircle className="w-3.5 h-3.5" /> Storage Warning
                       </span>
                     )}
 
-                    <div className="text-[10px] text-slate-500 w-full space-y-1 pt-2 border-t border-slate-150">
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 w-full space-y-1 pt-2 border-t border-slate-150 dark:border-slate-800">
                       <div className="flex justify-between">
                         <span>Used:</span>
-                        <span className="font-semibold text-slate-700">
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">
                           {storageMetrics?.database_size_available ? storageMetrics.database_size_formatted : 'Unavailable'}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Remaining:</span>
-                        <span className="font-semibold text-slate-700">
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">
                           {storageMetrics?.database_size_available ? storageMetrics.database_remaining_formatted : 'Unavailable'}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Capacity:</span>
-                        <span className="font-semibold text-slate-700">{storageMetrics?.database_capacity_formatted}</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{storageMetrics?.database_capacity_formatted}</span>
                       </div>
                     </div>
                   </div>
@@ -536,13 +531,13 @@ export default function DashboardPage() {
 
                 {/* Storage Bucket summaries */}
                 {storageMetrics && storageMetrics.buckets && (
-                  <div className="pt-4 border-t border-slate-100 space-y-2">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Storage Buckets Summary</span>
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                    <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Storage Buckets Summary</span>
                     <div className="space-y-1.5">
                       {storageMetrics.buckets.map((bucket) => (
-                        <div key={bucket.name} className="flex items-center justify-between text-[11px] p-2 bg-slate-50/50 rounded-lg border border-slate-100">
-                          <span className="font-mono text-slate-600 font-semibold">{bucket.name}</span>
-                          <span className="text-slate-500 font-medium">{bucket.file_count} files • {bucket.total_formatted}</span>
+                        <div key={bucket.name} className="flex items-center justify-between text-[11px] p-2 bg-slate-50/50 dark:bg-slate-950/20 rounded-lg border border-slate-100 dark:border-slate-800">
+                          <span className="font-mono text-slate-600 dark:text-slate-300 font-semibold">{bucket.name}</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-medium">{bucket.file_count} files • {bucket.total_formatted}</span>
                         </div>
                       ))}
                     </div>
@@ -553,7 +548,7 @@ export default function DashboardPage() {
                 <div className="pt-2">
                   <Link href="/storage">
                     <Button variant="outline" size="sm" className="w-full justify-center text-xs font-semibold">
-                      <HardDrive className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                      <HardDrive className="h-3.5 w-3.5 mr-2 text-slate-400 dark:text-slate-500" />
                       <span>Full Storage Metrics Dashboard</span>
                     </Button>
                   </Link>

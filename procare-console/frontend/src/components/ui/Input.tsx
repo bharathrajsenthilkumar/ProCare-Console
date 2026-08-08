@@ -26,7 +26,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             id={id}
             disabled={disabled}
-            className={`block w-full border border-slate-200 rounded-lg px-3.5 py-2.5 bg-white text-slate-800 text-sm placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent disabled:opacity-50 disabled:bg-slate-50 ${
+            className={`block w-full border border-slate-200 dark:border-slate-800 rounded-lg px-3.5 py-2.5 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm placeholder-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-900 ${
               icon ? 'pl-10' : ''
             } ${
               error ? 'border-red-300 focus:ring-red-500' : ''

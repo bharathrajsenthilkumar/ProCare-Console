@@ -103,7 +103,7 @@ export default function AppointmentsPage() {
     {
       header: 'Patient Name',
       accessor: (row) => (
-        <div className="font-semibold text-slate-800">
+        <div className="font-semibold text-slate-800 dark:text-slate-100">
           {row.patient_name || 'Anonymous Patient'}
         </div>
       ),
@@ -111,12 +111,12 @@ export default function AppointmentsPage() {
     {
       header: 'Phone Number',
       accessor: (row) => row.phone_number || 'N/A',
-      className: 'text-slate-600',
+      className: 'text-slate-600 dark:text-slate-400',
     },
     {
       header: 'WhatsApp Number',
       accessor: (row) => row.whatsapp_number || 'N/A',
-      className: 'text-slate-600',
+      className: 'text-slate-600 dark:text-slate-400',
     },
     {
       header: 'Appointment Date',
@@ -133,7 +133,7 @@ export default function AppointmentsPage() {
           return row.appointment_date;
         }
       },
-      className: 'text-slate-700 font-semibold',
+      className: 'text-slate-700 dark:text-slate-300 font-semibold',
     },
     {
       header: 'Schedule (Time)',
@@ -162,7 +162,7 @@ export default function AppointmentsPage() {
           return 'N/A';
         }
       },
-      className: 'text-slate-400 text-xs font-medium',
+      className: 'text-slate-400 dark:text-slate-500 text-xs font-medium',
     },
   ];
 
@@ -176,15 +176,15 @@ export default function AppointmentsPage() {
         description="Inspect booking requests, review practitioner schedules, and manage patient appointments."
         actions={
           <div className="flex gap-2">
-            <div className="text-xs text-slate-500 font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center">
-              Total Appointments: <span className="text-slate-800 ml-1">{total}</span>
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-lg shadow-xs flex items-center">
+              Total Appointments: <span className="text-slate-800 dark:text-slate-200 ml-1">{total}</span>
             </div>
             <Button 
               onClick={fetchAppointments} 
               variant="outline" 
               size="sm"
               disabled={loading}
-              className="bg-white border-slate-200 hover:bg-slate-50 shadow-xs"
+              className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-xs"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
@@ -195,7 +195,7 @@ export default function AppointmentsPage() {
 
       {/* Search Filter Panel */}
       <Card>
-        <CardContent className="p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <CardContent className="!p-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative w-full sm:max-w-xs">
             <Input
               id="search"
@@ -233,19 +233,19 @@ export default function AppointmentsPage() {
 
       {/* Main Content Area */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-12 flex flex-col items-center justify-center gap-3">
-          <svg className="animate-spin h-6 w-6 text-slate-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-12 flex flex-col items-center justify-center gap-3">
+          <svg className="animate-spin h-6 w-6 text-slate-800 dark:text-slate-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          <span className="text-xs text-slate-400 font-semibold tracking-wider uppercase">Fetching appointments...</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold tracking-wider uppercase">Fetching appointments...</span>
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 flex items-start gap-3 max-w-md mx-auto">
-          <AlertCircle className="h-6 w-6 text-red-600 shrink-0" />
+        <div className="bg-red-50 dark:bg-red-950/10 border border-red-200 dark:border-red-800 rounded-xl p-6 flex items-start gap-3 max-w-md mx-auto">
+          <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400 shrink-0" />
           <div>
-            <h4 className="font-bold text-red-800 text-sm">System Database Error</h4>
-            <p className="text-xs text-red-700 mt-1 leading-relaxed">{error}</p>
+            <h4 className="font-bold text-red-800 dark:text-red-200 text-sm">System Database Error</h4>
+            <p className="text-xs text-red-700 dark:text-red-400 mt-1 leading-relaxed">{error}</p>
           </div>
         </div>
       ) : appointments.length === 0 ? (
@@ -264,9 +264,9 @@ export default function AppointmentsPage() {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between bg-white border border-slate-200/80 shadow-sm rounded-xl px-5 py-4">
-              <div className="text-xs text-slate-500">
-                Showing page <span className="font-semibold text-slate-700">{page}</span> of <span className="font-semibold text-slate-700">{totalPages}</span>
+            <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-xl px-5 py-4">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Showing page <span className="font-semibold text-slate-700 dark:text-slate-350">{page}</span> of <span className="font-semibold text-slate-700 dark:text-slate-350">{totalPages}</span>
               </div>
               <div className="flex gap-2">
                 <Button 

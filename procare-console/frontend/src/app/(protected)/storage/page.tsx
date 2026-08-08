@@ -224,23 +224,23 @@ export default function StoragePage() {
         <div className="space-y-8">
           {/* Prominent Database Storage Warning Section (>= 90%) */}
           {metrics && metrics.database_usage_percentage >= 90 && (
-            <Card className="border-rose-250 bg-rose-50/20 shadow-sm overflow-hidden animate-fade-in">
+            <Card className="border-rose-250 dark:border-rose-800 bg-rose-50/20 dark:bg-rose-950/10 shadow-sm overflow-hidden animate-fade-in">
               <CardContent className="p-6 space-y-4">
-                <div className="flex items-start gap-3 text-rose-800">
+                <div className="flex items-start gap-3 text-rose-800 dark:text-rose-200">
                   <AlertTriangle className="h-6 w-6 text-rose-600 shrink-0 mt-0.5" />
                   <div className="space-y-1 w-full">
-                    <h3 className="font-bold text-rose-900 text-sm">Database Storage Management</h3>
-                    <p className="text-xs text-rose-700 leading-relaxed font-bold">
+                    <h3 className="font-bold text-rose-900 dark:text-rose-100 text-sm">Database Storage Management</h3>
+                    <p className="text-xs text-rose-700 dark:text-rose-350 leading-relaxed font-bold">
                       {metrics.database_usage_percentage >= 100 
                         ? "⚠ Database storage quota reached. Writes may be restricted by Supabase." 
                         : "⚠ Database storage is approaching its limit."}
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold text-rose-800 py-2 border-t border-b border-rose-100/50 my-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold text-rose-800 dark:text-rose-300 py-2 border-t border-b border-rose-100/50 dark:border-rose-800/50 my-2">
                       <div>Current Used: {metrics.database_size_formatted} / {metrics.database_capacity_formatted}</div>
                       <div>Usage Percentage: {metrics.database_usage_percentage.toFixed(1)}% Used</div>
                       <div>Remaining Space: {metrics.database_remaining_formatted}</div>
                     </div>
-                    <p className="text-[10px] text-rose-600 leading-relaxed">
+                    <p className="text-[10px] text-rose-600 dark:text-rose-400 leading-relaxed">
                       Recommended Actions: Export your records to CSV format, then navigate to the Users and Chatbot Logs managers to delete old or unnecessary records manually. No automatic deletions are initiated by the system.
                     </p>
                     <div className="flex flex-wrap gap-2.5 pt-3">
@@ -249,7 +249,7 @@ export default function StoragePage() {
                         size="sm" 
                         onClick={handleExportChats} 
                         disabled={exportChatsLoading}
-                        className="bg-white border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 font-semibold"
+                        className="bg-white dark:bg-slate-900 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-450 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-800 dark:hover:text-rose-300 font-semibold"
                       >
                         {exportChatsLoading ? 'Exporting...' : 'Export Chatbot Logs'}
                       </Button>
@@ -258,7 +258,7 @@ export default function StoragePage() {
                         size="sm" 
                         onClick={handleExportUsers} 
                         disabled={exportUsersLoading}
-                        className="bg-white border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 font-semibold"
+                        className="bg-white dark:bg-slate-900 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-450 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-800 dark:hover:text-rose-300 font-semibold"
                       >
                         {exportUsersLoading ? 'Exporting...' : 'Export Users'}
                       </Button>
@@ -266,7 +266,7 @@ export default function StoragePage() {
                         <Button 
                           variant="outline"
                           size="sm" 
-                          className="bg-white border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 font-semibold"
+                          className="bg-white dark:bg-slate-900 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-450 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-800 dark:hover:text-rose-300 font-semibold"
                         >
                           Manage Chatbot Logs
                         </Button>
@@ -275,7 +275,7 @@ export default function StoragePage() {
                         <Button 
                           variant="outline"
                           size="sm" 
-                          className="bg-white border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 font-semibold"
+                          className="bg-white dark:bg-slate-900 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-450 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-800 dark:hover:text-rose-300 font-semibold"
                         >
                           Manage Users
                         </Button>
@@ -289,22 +289,22 @@ export default function StoragePage() {
 
           {/* SUPABASE RESOURCE USAGE (SUMMARY SECTION) */}
           <div className="space-y-4">
-            <div className="border-b border-slate-100 pb-2">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Supabase Resource Usage</h2>
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Supabase Resource Usage</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Storage Usage Card */}
-              <Card className="border-slate-200 shadow-sm overflow-hidden">
+              <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                 <CardContent className="!p-6 !pb-8 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 bg-sky-50 rounded-xl border border-sky-100 text-sky-600">
+                      <div className="p-2.5 bg-sky-50 dark:bg-sky-950/20 rounded-xl border border-sky-100 dark:border-sky-800 text-sky-600 dark:text-sky-400">
                         <HardDrive className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">Supabase Storage</h3>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Asset storage metrics in the project</p>
+                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Supabase Storage</h3>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Asset storage metrics in the project</p>
                       </div>
                     </div>
                     <Badge variant="info">Free Plan</Badge>
@@ -312,27 +312,27 @@ export default function StoragePage() {
                   
                   <div className="grid grid-cols-2 gap-4 pt-2">
                     <div className="space-y-1">
-                      <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Used</span>
-                      <span className="text-lg font-extrabold text-slate-700 block">{metrics?.storage_used_formatted}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-550 font-semibold block uppercase tracking-wider">Used</span>
+                      <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 block">{metrics?.storage_used_formatted}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Capacity</span>
-                      <span className="text-lg font-extrabold text-slate-700 block">{metrics?.storage_capacity_formatted}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-550 font-semibold block uppercase tracking-wider">Capacity</span>
+                      <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 block">{metrics?.storage_capacity_formatted}</span>
                     </div>
                   </div>
 
                   <div className="space-y-2 pb-2">
-                    <div className="flex justify-between text-xs font-semibold text-slate-500">
+                    <div className="flex justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
                       <span>Usage Progress</span>
                       <span>{metrics?.storage_usage_percentage.toFixed(1)}%</span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
                       <div 
                         className="bg-sky-500 h-full rounded-full transition-all duration-500" 
                         style={{ width: `${metrics?.storage_usage_percentage}%` }}
                       />
                     </div>
-                    <div className="text-[10px] text-slate-400 flex justify-between">
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500 flex justify-between">
                       <span>Remaining: {metrics?.storage_remaining_formatted}</span>
                       <span>1 GB Limit</span>
                     </div>
@@ -342,21 +342,21 @@ export default function StoragePage() {
 
               {/* Database Usage Card */}
               <Card className={`shadow-sm overflow-hidden border ${
-                metrics && metrics.database_usage_percentage >= 90 ? 'border-rose-200 bg-rose-50/5' : 'border-slate-200'
+                metrics && metrics.database_usage_percentage >= 90 ? 'border-rose-250 bg-rose-50/5 dark:border-rose-800' : 'border-slate-200 dark:border-slate-800'
               }`}>
                 <CardContent className="!p-6 !pb-8 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`p-2.5 rounded-xl border ${
                         metrics && metrics.database_usage_percentage >= 90 
-                          ? 'bg-rose-50 border-rose-100 text-rose-600' 
-                          : 'bg-violet-50 border-violet-100 text-violet-600'
+                          ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-100 dark:border-rose-800 text-rose-600 dark:text-rose-450' 
+                          : 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-800 text-violet-600 dark:text-violet-400'
                       }`}>
                         <Database className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">Supabase Database</h3>
-                        <p className="text-[10px] text-slate-400 mt-0.5">PostgreSQL database metrics in the project</p>
+                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Supabase Database</h3>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">PostgreSQL database metrics in the project</p>
                       </div>
                     </div>
                     <Badge variant={metrics && metrics.database_usage_percentage >= 90 ? 'danger' : 'info'}>
@@ -366,23 +366,23 @@ export default function StoragePage() {
 
                   <div className="grid grid-cols-2 gap-4 pt-2">
                     <div className="space-y-1">
-                      <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Used</span>
-                      <span className="text-lg font-extrabold text-slate-700 block">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-550 font-semibold block uppercase tracking-wider">Used</span>
+                      <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 block">
                         {metrics?.database_size_available ? metrics.database_size_formatted : 'Unavailable'}
                       </span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">Capacity</span>
-                      <span className="text-lg font-extrabold text-slate-700 block">{metrics?.database_capacity_formatted}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-550 font-semibold block uppercase tracking-wider">Capacity</span>
+                      <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 block">{metrics?.database_capacity_formatted}</span>
                     </div>
                   </div>
 
                   <div className="space-y-2 pb-2">
-                    <div className="flex justify-between text-xs font-semibold text-slate-500">
+                    <div className="flex justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
                       <span>Usage Progress</span>
                       <span>{metrics?.database_size_available ? `${metrics.database_usage_percentage.toFixed(1)}%` : '0%'}</span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all duration-500 ${
                           metrics && metrics.database_usage_percentage >= 90 ? 'bg-rose-500' : 'bg-violet-500'
@@ -390,7 +390,7 @@ export default function StoragePage() {
                         style={{ width: `${metrics?.database_size_available ? metrics.database_usage_percentage : 0}%` }}
                       />
                     </div>
-                    <div className="text-[10px] text-slate-400 flex justify-between">
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500 flex justify-between">
                       <span>Remaining: {metrics?.database_remaining_formatted}</span>
                       <span>500 MB Limit</span>
                     </div>
@@ -402,19 +402,19 @@ export default function StoragePage() {
 
           {/* SECTION 1 — SUPABASE STORAGE BUCKETS */}
           <div className="space-y-4">
-            <div className="border-b border-slate-100 pb-2">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Section 1 — Supabase Storage Buckets</h2>
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Section 1 — Supabase Storage Buckets</h2>
             </div>
 
-            <Card className="border-slate-200 shadow-sm">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-bold text-slate-800">Storage Size Distribution</CardTitle>
-                <div className="text-xs text-slate-500 font-medium">
+                <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-100">Storage Size Distribution</CardTitle>
+                <div className="text-xs text-slate-500 dark:text-slate-450 font-medium">
                   {metrics?.total_files_stored} files total across monitored buckets
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="w-full bg-slate-100 rounded-full h-4 overflow-hidden flex">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-4 overflow-hidden flex">
                   <div 
                     className="bg-sky-500 h-full transition-all duration-500" 
                     style={{ width: `${galleryPct}%` }}
@@ -427,11 +427,11 @@ export default function StoragePage() {
                   />
                 </div>
                 <div className="flex items-center gap-6 text-xs justify-center pt-2">
-                  <div className="flex items-center gap-2 font-medium text-slate-600">
+                  <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
                     <div className="h-3 w-3 bg-sky-500 rounded" />
                     <span>Gallery Images ({galleryPct.toFixed(1)}%)</span>
                   </div>
-                  <div className="flex items-center gap-2 font-medium text-slate-600">
+                  <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
                     <div className="h-3 w-3 bg-emerald-500 rounded" />
                     <span>Team Images ({teamPct.toFixed(1)}%)</span>
                   </div>
@@ -441,54 +441,54 @@ export default function StoragePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Gallery Bucket */}
-              <Card className="border-slate-200 shadow-sm">
+              <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-bold text-slate-800">Gallery Bucket Allocation</CardTitle>
+                  <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-100">Gallery Bucket Allocation</CardTitle>
                   <Badge variant="info">PUBLIC READ</Badge>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl">
                     <ImageIcon className="h-5 w-5 text-sky-500" />
                     <div className="text-xs">
-                      <span className="font-bold text-slate-500 block">BUCKET DIRECTORY</span>
-                      <span className="font-mono text-slate-700 font-semibold">{gallery?.name}</span>
+                      <span className="font-bold text-slate-500 dark:text-slate-450 block">BUCKET DIRECTORY</span>
+                      <span className="font-mono text-slate-700 dark:text-slate-300 font-semibold">{gallery?.name}</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-center">
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wide">File Count</span>
-                      <span className="text-lg font-bold text-slate-700 mt-1 block">{gallery?.file_count}</span>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-center">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wide">File Count</span>
+                      <span className="text-lg font-bold text-slate-700 dark:text-slate-200 mt-1 block">{gallery?.file_count}</span>
                     </div>
-                    <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-center">
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wide">Total Weight</span>
-                      <span className="text-lg font-bold text-slate-700 mt-1 block">{gallery?.total_formatted}</span>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-center">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wide">Total Weight</span>
+                      <span className="text-lg font-bold text-slate-700 dark:text-slate-200 mt-1 block">{gallery?.total_formatted}</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Team Bucket */}
-              <Card className="border-slate-200 shadow-sm">
+              <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-bold text-slate-800">Team Bucket Allocation</CardTitle>
+                  <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-100">Team Bucket Allocation</CardTitle>
                   <Badge variant="info">PUBLIC READ</Badge>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl">
                     <UserCheck className="h-5 w-5 text-emerald-500" />
                     <div className="text-xs">
-                      <span className="font-bold text-slate-500 block">BUCKET DIRECTORY</span>
-                      <span className="font-mono text-slate-700 font-semibold">{team?.name}</span>
+                      <span className="font-bold text-slate-500 dark:text-slate-450 block">BUCKET DIRECTORY</span>
+                      <span className="font-mono text-slate-700 dark:text-slate-300 font-semibold">{team?.name}</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-center">
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wide">File Count</span>
-                      <span className="text-lg font-bold text-slate-700 mt-1 block">{team?.file_count}</span>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-center">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wide">File Count</span>
+                      <span className="text-lg font-bold text-slate-700 dark:text-slate-200 mt-1 block">{team?.file_count}</span>
                     </div>
-                    <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-center">
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wide">Total Weight</span>
-                      <span className="text-lg font-bold text-slate-700 mt-1 block">{team?.total_formatted}</span>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-center">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wide">Total Weight</span>
+                      <span className="text-lg font-bold text-slate-700 dark:text-slate-200 mt-1 block">{team?.total_formatted}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -498,29 +498,29 @@ export default function StoragePage() {
 
           {/* SECTION 2 — DATABASE TABLE STORAGE */}
           <div className="space-y-4">
-            <div className="border-b border-slate-100 pb-2">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Section 2 — Database Table Storage</h2>
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Section 2 — Database Table Storage</h2>
             </div>
 
             {metrics?.database_table_available ? (
               <div className="space-y-6">
-                <Card className="border-slate-200 shadow-sm">
+                <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
                   <CardHeader>
-                    <CardTitle className="text-sm font-bold text-slate-800">Database Table Sizing Summary</CardTitle>
+                    <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-100">Database Table Sizing Summary</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Total Database Table Storage</span>
-                        <span className="text-lg font-extrabold text-slate-700 mt-1 block">{metrics.database_table_storage_total_formatted}</span>
+                      <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Total Database Table Storage</span>
+                        <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-1 block">{metrics.database_table_storage_total_formatted}</span>
                       </div>
-                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Tracked Tables Count</span>
-                        <span className="text-lg font-extrabold text-slate-700 mt-1 block">{metrics.database_tables.length} tables</span>
+                      <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Tracked Tables Count</span>
+                        <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-1 block">{metrics.database_tables.length} tables</span>
                       </div>
-                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Primary Audit Logs Table</span>
-                        <span className="text-lg font-extrabold text-slate-700 mt-1 block">chatbot_logs</span>
+                      <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Primary Audit Logs Table</span>
+                        <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-1 block">chatbot_logs</span>
                       </div>
                     </div>
                   </CardContent>
@@ -556,38 +556,38 @@ export default function StoragePage() {
 
                     const cardContent = (
                       <Card 
-                        className={`border-slate-200 shadow-sm transition-all duration-300 ${
+                        className={`border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 ${
                           isHighlighted ? 'ring-2 ring-violet-500/30' : ''
                         } ${link ? 'hover:ring-2 hover:ring-sky-500/50 hover:cursor-pointer' : ''}`}
                       >
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                          <CardTitle className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                          <CardTitle className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                             <Table className="h-4 w-4 text-slate-400" />
-                            <span className="font-mono text-slate-700">{table.table_name}</span>
+                            <span className="font-mono text-slate-700 dark:text-slate-350">{table.table_name}</span>
                           </CardTitle>
                           {isChatbotLogs && <Badge variant="success">AUDIT LOGS</Badge>}
                           {isSystemLogs && <Badge variant="info">SYSTEM LOGS</Badge>}
                         </CardHeader>
                         <CardContent className="space-y-3">
                           <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="p-2 bg-slate-50 border border-slate-100 rounded-lg">
-                              <span className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">Row Count</span>
-                              <span className="font-bold text-slate-700 mt-0.5 block">{table.row_count} rows</span>
+                            <div className="p-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-lg">
+                              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">Row Count</span>
+                              <span className="font-bold text-slate-700 dark:text-slate-200 mt-0.5 block">{table.row_count} rows</span>
                             </div>
-                            <div className="p-2 bg-slate-50 border border-slate-100 rounded-lg">
-                              <span className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">Total Size</span>
-                              <span className="font-mono font-bold text-slate-700 mt-0.5 block">{table.total_size_formatted}</span>
+                            <div className="p-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-lg">
+                              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wider">Total Size</span>
+                              <span className="font-mono font-bold text-slate-700 dark:text-slate-200 mt-0.5 block">{table.total_size_formatted}</span>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="p-2 bg-slate-50/50 border border-slate-100/50 rounded-lg">
-                              <span className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">Data Size</span>
-                              <span className="font-mono text-slate-600 block mt-0.5">{table.data_size_formatted}</span>
+                            <div className="p-2 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100/50 dark:border-slate-700/50 rounded-lg">
+                              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wider">Data Size</span>
+                              <span className="font-mono text-slate-600 dark:text-slate-350 block mt-0.5">{table.data_size_formatted}</span>
                             </div>
-                            <div className="p-2 bg-slate-50/50 border border-slate-100/50 rounded-lg">
-                              <span className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">Index Size</span>
-                              <span className="font-mono text-slate-600 block mt-0.5">{table.index_size_formatted}</span>
+                            <div className="p-2 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100/50 dark:border-slate-700/50 rounded-lg">
+                              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wider">Index Size</span>
+                              <span className="font-mono text-slate-600 dark:text-slate-350 block mt-0.5">{table.index_size_formatted}</span>
                             </div>
                           </div>
                         </CardContent>
@@ -607,13 +607,13 @@ export default function StoragePage() {
                 </div>
               </div>
             ) : (
-              <Card className="border-slate-200 shadow-sm">
+              <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
                 <CardContent className="p-6 space-y-4">
-                  <div className="p-4 bg-sky-50 border border-sky-100 text-sky-800 text-xs rounded-xl flex gap-3 leading-relaxed">
+                  <div className="p-4 bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-800 text-sky-800 dark:text-sky-200 text-xs rounded-xl flex gap-3 leading-relaxed">
                     <Info className="h-5 w-5 text-sky-600 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold">PostgREST Schema Catalog Restriction</p>
-                      <p className="mt-0.5 text-sky-700/90 font-normal">
+                      <p className="mt-0.5 text-sky-700/90 dark:text-sky-300 font-normal">
                         Database table size statistics could not be loaded. Please ensure the PostgreSQL helper RPC `get_table_metrics` has been created and granted execute permission to the `service_role` database role.
                       </p>
                     </div>
@@ -625,46 +625,46 @@ export default function StoragePage() {
 
           {/* SECTION 3 — SUPABASE DATABASE QUOTA USAGE */}
           <div className="space-y-4">
-            <div className="border-b border-slate-100 pb-2">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Section 3 — Supabase Database Quota Usage</h2>
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Section 3 — Supabase Database Quota Usage</h2>
             </div>
             
-            <Card className="border-slate-200 shadow-sm">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-sm font-bold text-slate-800">Supabase Database Quota Usage</CardTitle>
+                <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-100">Supabase Database Quota Usage</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider font-semibold">Database Capacity</span>
-                    <span className="text-lg font-extrabold text-slate-700 mt-1 block">{metrics?.database_capacity_formatted}</span>
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider font-semibold">Database Capacity</span>
+                    <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-1 block">{metrics?.database_capacity_formatted}</span>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider font-semibold">Database Used</span>
-                    <span className="text-lg font-extrabold text-slate-700 mt-1 block">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block uppercase tracking-wider font-semibold">Database Used</span>
+                    <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-1 block">
                       {metrics?.database_size_available ? metrics.database_size_formatted : 'Unavailable'}
                     </span>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider font-semibold">Database Remaining</span>
-                    <span className="text-lg font-extrabold text-slate-700 mt-1 block">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wider font-semibold">Database Remaining</span>
+                    <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-1 block">
                       {metrics?.database_size_available ? metrics.database_remaining_formatted : 'Unavailable'}
                     </span>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider font-semibold">Database Usage Percentage</span>
-                    <span className="text-lg font-extrabold text-slate-700 mt-1 block">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 block uppercase tracking-wider font-semibold">Database Usage Percentage</span>
+                    <span className="text-lg font-extrabold text-slate-700 dark:text-slate-200 mt-1 block">
                       {metrics?.database_size_available ? `${metrics.database_usage_percentage.toFixed(1)}%` : '0%'}
                     </span>
                   </div>
                 </div>
 
                 {/* Explanatory Notice */}
-                <div className="p-4 bg-sky-50 border border-sky-100 text-sky-800 text-xs rounded-xl flex gap-3 leading-relaxed">
+                <div className="p-4 bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-800 text-sky-800 dark:text-sky-200 text-xs rounded-xl flex gap-3 leading-relaxed">
                   <Info className="h-5 w-5 text-sky-600 shrink-0 mt-0.5" />
                   <div>
                     <p className="font-bold">System Quota Notice</p>
-                    <p className="mt-0.5 text-sky-700/90 font-normal">
+                    <p className="mt-0.5 text-sky-700/90 dark:text-sky-300 font-normal">
                       Database Used represents the total PostgreSQL database size reported by the existing get_database_size() RPC. This is different from the sum of the tracked application table sizes. Database Table Storage represents only user-created tables in the public schema, while the full Database Size includes internal catalogs, database metadata, and auth schemas.
                     </p>
                   </div>

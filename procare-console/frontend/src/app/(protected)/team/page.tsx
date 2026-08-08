@@ -261,7 +261,7 @@ export default function TeamPage() {
     {
       header: 'Avatar',
       accessor: (row) => (
-        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0">
+        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-center flex-shrink-0">
           <img 
             src={row.image_path} 
             alt={row.name} 
@@ -276,14 +276,14 @@ export default function TeamPage() {
     {
       header: 'Staff Name',
       accessor: (row) => (
-        <span className="font-semibold text-slate-800">{row.name}</span>
+        <span className="font-semibold text-slate-800 dark:text-slate-100">{row.name}</span>
       ),
     },
     {
       header: 'Designation / Role',
       accessor: (row) => (
-        <span className="text-slate-600 font-medium flex items-center gap-1">
-          <Award className="w-3.5 h-3.5 text-slate-400" /> {row.role || 'Practitioner'}
+        <span className="text-slate-600 dark:text-slate-350 font-medium flex items-center gap-1">
+          <Award className="w-3.5 h-3.5 text-slate-400 dark:text-slate-555" /> {row.role || 'Practitioner'}
         </span>
       ),
     },
@@ -319,7 +319,7 @@ export default function TeamPage() {
             variant="outline" 
             size="sm"
             onClick={() => openEditModal(row)}
-            className="h-8 px-2.5 text-slate-600 hover:text-slate-900"
+            className="h-8 px-2.5 text-slate-600 dark:text-slate-355 hover:text-slate-900 dark:hover:text-slate-100"
           >
             <Edit className="w-4 h-4 mr-1" /> Edit
           </Button>
@@ -327,7 +327,7 @@ export default function TeamPage() {
             variant="outline" 
             size="sm"
             onClick={() => openDeleteModal(row)}
-            className="h-8 px-2.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-100 hover:border-rose-200"
+            className="h-8 px-2.5 text-rose-600 dark:text-rose-455 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 border-rose-100 dark:border-rose-950 hover:border-rose-200 dark:hover:border-rose-900"
           >
             <Trash2 className="w-4 h-4 mr-1" /> Delete
           </Button>
@@ -380,7 +380,7 @@ export default function TeamPage() {
         </Card>
       ) : (
         <Card className="border-slate-200 shadow-sm overflow-hidden">
-          <CardContent className="p-0">
+          <CardContent className="!p-6">
             <DataTable 
               data={members} 
               columns={columns} 
@@ -392,11 +392,11 @@ export default function TeamPage() {
 
       {/* --- ADD MODAL --- */}
       {isAddOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-lg">Add Staff Member</h3>
-              <button onClick={() => setIsAddOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+        <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Add Staff Member</h3>
+              <button onClick={() => setIsAddOpen(false)} className="text-slate-400 hover:text-slate-655 dark:text-slate-500 dark:hover:text-slate-350 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -409,7 +409,7 @@ export default function TeamPage() {
                   </div>
                 )}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Full Name</label>
                   <Input 
                     placeholder="e.g. Dr. Jane Doe (PT)"
                     value={name}
@@ -418,7 +418,7 @@ export default function TeamPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Designation / Role</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Designation / Role</label>
                   <Input 
                     placeholder="e.g. LEAD PHYSIOTHERAPIST"
                     value={role}
@@ -427,16 +427,16 @@ export default function TeamPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Profile Photo</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Profile Photo</label>
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-slate-100/50 flex flex-col items-center justify-center gap-2"
+                    className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-50 dark:bg-slate-850/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 flex flex-col items-center justify-center gap-2"
                   >
                     <Upload className="w-6 h-6 text-slate-400" />
-                    <span className="text-sm font-semibold text-slate-600">
+                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
                       {selectedFile ? selectedFile.name : 'Upload Profile Picture'}
                     </span>
-                    <span className="text-xs text-slate-400">Supports JPG, PNG, WEBP, GIF (Max 5MB)</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-550">Supports JPG, PNG, WEBP, GIF (Max 5MB)</span>
                   </div>
                   <input 
                     type="file" 
@@ -448,7 +448,7 @@ export default function TeamPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Display Sequence</label>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Display Sequence</label>
                     <Input 
                       type="number" 
                       value={displayOrder}
@@ -457,9 +457,9 @@ export default function TeamPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
-                    <div className="flex items-center h-10 border border-slate-200 rounded-lg px-3 bg-white">
-                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 font-medium">
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Status</label>
+                    <div className="flex items-center h-10 border border-slate-200 dark:border-slate-855 rounded-lg px-3 bg-white dark:bg-slate-950">
+                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 dark:text-slate-300 font-medium">
                         <input 
                           type="checkbox" 
                           checked={isActive}
@@ -472,7 +472,7 @@ export default function TeamPage() {
                   </div>
                 </div>
               </div>
-              <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={actionLoading}>
                   {actionLoading ? 'Saving...' : 'Add Practitioner'}
@@ -485,11 +485,11 @@ export default function TeamPage() {
 
       {/* --- EDIT MODAL --- */}
       {isEditOpen && editMember && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-lg">Edit Staff Profile</h3>
-              <button onClick={() => setIsEditOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+        <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Edit Staff Profile</h3>
+              <button onClick={() => setIsEditOpen(false)} className="text-slate-400 hover:text-slate-655 dark:text-slate-500 dark:hover:text-slate-355 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -503,17 +503,17 @@ export default function TeamPage() {
                 )}
                 
                 <div className="flex items-center gap-4">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0">
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-center flex-shrink-0">
                     <img src={editMember.image_path} className="w-full h-full object-cover object-top" alt="Current" />
                   </div>
                   <div className="space-y-1.5 flex-1">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Replace Profile Image (Optional)</label>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Replace Profile Image (Optional)</label>
                     <div 
                       onClick={() => editFileInputRef.current?.click()}
-                      className="border border-dashed border-slate-200 hover:border-slate-400 rounded-xl p-2.5 text-center cursor-pointer bg-slate-50 hover:bg-slate-100/50 flex items-center justify-center gap-1.5"
+                      className="border border-dashed border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 rounded-xl p-2.5 text-center cursor-pointer bg-slate-50 dark:bg-slate-850/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 flex items-center justify-center gap-1.5"
                     >
                       <Upload className="w-4 h-4 text-slate-400" />
-                      <span className="text-xs font-semibold text-slate-600">
+                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                         {selectedFile ? selectedFile.name : 'Upload New Photo'}
                       </span>
                     </div>
@@ -528,7 +528,7 @@ export default function TeamPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Full Name</label>
                   <Input 
                     placeholder="e.g. Dr. Jane Doe (PT)"
                     value={name}
@@ -537,7 +537,7 @@ export default function TeamPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Designation / Role</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Designation / Role</label>
                   <Input 
                     placeholder="e.g. LEAD PHYSIOTHERAPIST"
                     value={role}
@@ -548,7 +548,7 @@ export default function TeamPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Display Sequence</label>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-550 uppercase tracking-wider">Display Sequence</label>
                     <Input 
                       type="number" 
                       value={displayOrder}
@@ -557,9 +557,9 @@ export default function TeamPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
-                    <div className="flex items-center h-10 border border-slate-200 rounded-lg px-3 bg-white">
-                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 font-medium">
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-550 uppercase tracking-wider">Status</label>
+                    <div className="flex items-center h-10 border border-slate-200 dark:border-slate-855 rounded-lg px-3 bg-white dark:bg-slate-950">
+                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 dark:text-slate-300 font-medium">
                         <input 
                           type="checkbox" 
                           checked={isActive}
@@ -572,7 +572,7 @@ export default function TeamPage() {
                   </div>
                 </div>
               </div>
-              <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={actionLoading}>
                   {actionLoading ? 'Updating...' : 'Update Details'}
@@ -585,23 +585,23 @@ export default function TeamPage() {
 
       {/* --- DELETE CONFIRMATION --- */}
       {isDeleteOpen && editMember && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 text-center space-y-4">
-              <div className="w-12 h-12 bg-rose-50 border border-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-800 text-rose-600 rounded-full flex items-center justify-center mx-auto">
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-bold text-slate-800 text-lg">Remove Staff Profile?</h3>
-                <p className="text-sm text-slate-500">
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Remove Staff Profile?</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   This action is permanent. The profile details and associated photo for **{editMember.name}** will be permanently removed.
                 </p>
               </div>
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border border-slate-200 mx-auto">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 mx-auto">
                 <img src={editMember.image_path} className="w-full h-full object-cover object-top" alt="delete-preview" />
               </div>
             </div>
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
               <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
               <Button 
                 onClick={handleDeleteSubmit}

@@ -9,8 +9,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     return (
       <div
         ref={ref}
-        className={`bg-white rounded-xl border border-slate-200/80 shadow-sm ${
-          hoverEffect ? 'hover:shadow-md hover:border-slate-300/80 transition-all duration-200' : ''
+        className={`bg-white rounded-xl border border-slate-200/80 shadow-sm dark:bg-slate-900 dark:border-slate-800 ${
+          hoverEffect ? 'hover:shadow-md hover:border-slate-300/80 transition-all duration-200 dark:hover:border-slate-700' : ''
         } ${className}`}
         {...props}
       >
@@ -28,13 +28,13 @@ export const CardHeader = ({ className = '', children, ...props }: React.HTMLAtt
 );
 
 export const CardTitle = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-  <h3 className={`text-base font-bold text-slate-800 leading-none tracking-tight ${className}`} {...props}>
+  <h3 className={`text-base font-bold text-slate-800 dark:text-slate-50 leading-none tracking-tight ${className}`} {...props}>
     {children}
   </h3>
 );
 
 export const CardDescription = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
-  <p className={`text-xs text-slate-400 ${className}`} {...props}>
+  <p className={`text-xs text-slate-400 dark:text-slate-400 ${className}`} {...props}>
     {children}
   </p>
 );
@@ -46,7 +46,7 @@ export const CardContent = ({ className = '', children, ...props }: React.HTMLAt
 );
 
 export const CardFooter = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={`p-5 pt-4 border-t border-slate-100 flex items-center justify-between ${className}`} {...props}>
+  <div className={`p-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between ${className}`} {...props}>
     {children}
   </div>
 );

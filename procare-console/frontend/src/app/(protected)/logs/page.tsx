@@ -201,7 +201,7 @@ export default function LogsPage() {
           return row.created_at;
         }
       },
-      className: 'text-slate-500 font-medium text-xs',
+      className: 'text-slate-500 dark:text-slate-400 font-medium text-xs',
     },
     {
       header: 'Level',
@@ -222,7 +222,7 @@ export default function LogsPage() {
     {
       header: 'Action',
       accessor: (row) => (
-        <span className="font-semibold text-slate-800">
+        <span className="font-semibold text-slate-800 dark:text-slate-100">
           {row.action}
         </span>
       ),
@@ -231,7 +231,7 @@ export default function LogsPage() {
     {
       header: 'Admin',
       accessor: (row) => row.admin_email || 'System',
-      className: 'text-slate-600 font-medium text-xs',
+      className: 'text-slate-600 dark:text-slate-350 font-medium text-xs',
     },
     {
       header: 'Details / Payload',
@@ -241,14 +241,14 @@ export default function LogsPage() {
         const displayStr = detailsStr.length > 40 ? `${detailsStr.substring(0, 40)}...` : detailsStr;
         return (
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[11px] text-slate-400 max-w-xs truncate">
+            <span className="font-mono text-[11px] text-slate-400 dark:text-slate-450 max-w-xs truncate">
               {displayStr}
             </span>
             {detailsObj && (
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="px-2 py-0.5 h-6 text-[10px] bg-slate-50 border-slate-200 hover:bg-slate-100/50"
+                className="px-2 py-0.5 h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-100/50 dark:hover:bg-slate-850/50 text-slate-700 dark:text-slate-300"
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedLog(row);
@@ -278,7 +278,7 @@ export default function LogsPage() {
               size="sm"
               onClick={handleExportCSV}
               disabled={exportLoading || logs.length === 0}
-              className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs"
+              className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-xs"
             >
               <Download className="w-4 h-4 mr-1.5" />
               {exportLoading ? 'Exporting...' : 'Export CSV'}
@@ -294,8 +294,8 @@ export default function LogsPage() {
                 Delete Selected ({selectedLogIds.length})
               </Button>
             )}
-            <div className="text-xs text-slate-500 font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center">
-              Total Logs: <span className="text-slate-800 ml-1">{total}</span>
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-lg shadow-xs flex items-center">
+              Total Logs: <span className="text-slate-800 dark:text-slate-200 ml-1">{total}</span>
             </div>
           </div>
         }
@@ -303,7 +303,7 @@ export default function LogsPage() {
 
       {/* Filter Toolbar */}
       <Card>
-        <CardContent className="p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <CardContent className="!p-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-400" />
             <span className="text-xs text-slate-400 font-semibold uppercase">Filter Level:</span>
@@ -312,7 +312,7 @@ export default function LogsPage() {
             <select
               value={levelFilter}
               onChange={(e) => setLevelFilter(e.target.value)}
-              className="block w-full border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
+              className="block w-full border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 cursor-pointer"
             >
               <option value="">All Log Levels</option>
               <option value="INFO">INFO</option>
@@ -417,18 +417,18 @@ export default function LogsPage() {
       {selectedLog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs" onClick={() => setSelectedLog(null)} />
-          <div className="bg-white border border-slate-200 shadow-xl rounded-2xl w-full max-w-xl max-h-[80vh] flex flex-col relative z-10 animate-scale-in overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl w-full max-w-xl max-h-[80vh] flex flex-col relative z-10 animate-scale-in overflow-hidden">
             
             {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
               <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-slate-600" />
-                <h3 className="text-sm font-bold text-slate-800 tracking-tight">Inspect System Log</h3>
+                <Activity className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-tight">Inspect System Log</h3>
               </div>
               <button 
                 type="button" 
                 onClick={() => setSelectedLog(null)}
-                className="text-slate-400 hover:text-slate-650 focus:outline-none transition-colors"
+                className="text-slate-400 hover:text-slate-650 dark:text-slate-500 dark:hover:text-slate-350 focus:outline-none transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -437,25 +437,25 @@ export default function LogsPage() {
             {/* Modal Content */}
             <div className="p-6 overflow-y-auto space-y-4">
               <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Action</span>
-                  <p className="text-sm font-bold text-slate-800 mt-1">{selectedLog.action}</p>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Action</span>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">{selectedLog.action}</p>
                 </div>
-                <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Admin</span>
-                  <p className="text-sm font-bold text-slate-800 mt-1">{selectedLog.admin_email || 'System'}</p>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Admin</span>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">{selectedLog.admin_email || 'System'}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Timestamp</span>
-                  <p className="text-xs font-bold text-slate-800 mt-1">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Timestamp</span>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100 mt-1">
                     {new Date(selectedLog.created_at).toLocaleString()}
                   </p>
                 </div>
-                <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Log level</span>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Log level</span>
                   <div className="mt-1">
                     <Badge variant={selectedLog.level.toUpperCase() === 'ERROR' ? 'danger' : selectedLog.level.toUpperCase() === 'WARNING' ? 'warning' : 'info'}>
                       {selectedLog.level.toUpperCase()}
@@ -466,15 +466,15 @@ export default function LogsPage() {
 
               {/* JSON Code block details */}
               <div className="pt-2">
-                <span className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-2">Details Payload (JSON)</span>
-                <div className="bg-slate-900 border border-slate-950 p-4 rounded-xl overflow-x-auto text-[11px] font-mono text-emerald-400 leading-relaxed max-h-[30vh]">
+                <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider mb-2">Details Payload (JSON)</span>
+                <div className="bg-slate-900 dark:bg-slate-950 border border-slate-950 dark:border-slate-800 p-4 rounded-xl overflow-x-auto text-[11px] font-mono text-emerald-400 dark:text-emerald-300 leading-relaxed max-h-[30vh]">
                   <pre>{JSON.stringify(selectedLog.details, null, 2)}</pre>
                 </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+            <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 flex justify-end">
               <Button variant="secondary" size="sm" onClick={() => setSelectedLog(null)}>
                 Dismiss
               </Button>

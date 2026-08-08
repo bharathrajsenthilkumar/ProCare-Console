@@ -301,7 +301,7 @@ export default function ChatLogsPage() {
     {
       header: 'Session ID',
       accessor: (row) => (
-        <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100/80 px-2 py-0.5 rounded">
+        <span className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-350 bg-slate-50 dark:bg-slate-950 border border-slate-100/80 dark:border-slate-800 px-2 py-0.5 rounded">
           {row.session_id.substring(0, 12)}...
         </span>
       ),
@@ -310,9 +310,9 @@ export default function ChatLogsPage() {
       header: 'Patient Identity',
       accessor: (row) => (
         <div className="space-y-0.5">
-          <div className="font-semibold text-slate-800">{row.user_name}</div>
+          <div className="font-semibold text-slate-800 dark:text-slate-100">{row.user_name}</div>
           {row.user_mobile_number !== 'N/A' && (
-            <div className="text-[10px] text-slate-400 font-medium">{row.user_mobile_number}</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-400 font-medium">{row.user_mobile_number}</div>
           )}
         </div>
       ),
@@ -328,12 +328,12 @@ export default function ChatLogsPage() {
     {
       header: 'Messages',
       accessor: (row) => `${row.message_count} dialogs`,
-      className: 'text-slate-500',
+      className: 'text-slate-500 dark:text-slate-400',
     },
     {
       header: 'Latency (Avg)',
       accessor: (row) => (
-        <span className="font-medium text-slate-600">
+        <span className="font-medium text-slate-600 dark:text-slate-300">
           {row.average_response_time}ms
         </span>
       ),
@@ -346,7 +346,7 @@ export default function ChatLogsPage() {
         hour: '2-digit',
         minute: '2-digit'
       }),
-      className: 'text-slate-400 text-xs font-medium',
+      className: 'text-slate-400 dark:text-slate-500 text-xs font-medium',
     },
     {
       header: 'Action',
@@ -374,7 +374,7 @@ export default function ChatLogsPage() {
               size="sm"
               onClick={handleExportCSV}
               disabled={exportLoading || sessions.length === 0}
-              className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs"
+              className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-xs"
             >
               <Download className="w-4 h-4 mr-1.5" />
               {exportLoading ? 'Exporting...' : 'Export CSV'}
@@ -383,7 +383,7 @@ export default function ChatLogsPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsCleanupOpen(true)}
-              className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs"
+              className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-xs"
             >
               <Trash2 className="w-4 h-4 mr-1.5" />
               Manual Cleanup
@@ -399,8 +399,8 @@ export default function ChatLogsPage() {
                 Delete Selected ({selectedSessionIds.length})
               </Button>
             )}
-            <div className="text-xs text-slate-500 font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center">
-              Conversations: <span className="text-slate-800 ml-1">{total}</span>
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-lg shadow-xs flex items-center">
+              Conversations: <span className="text-slate-800 dark:text-slate-200 ml-1">{total}</span>
             </div>
           </div>
         }
@@ -408,7 +408,7 @@ export default function ChatLogsPage() {
 
       {/* Filter Toolbar */}
       <Card>
-        <CardContent className="p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <CardContent className="!p-6 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex flex-col sm:flex-row gap-3 items-center w-full md:w-auto">
             {/* Search Input */}
             <div className="relative w-full sm:max-w-xs">
@@ -426,7 +426,7 @@ export default function ChatLogsPage() {
               <select
                 value={channel}
                 onChange={(e) => setChannel(e.target.value)}
-                className="block w-full border border-slate-200 rounded-lg px-3 py-2.5 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent select-none cursor-pointer"
+                className="block w-full border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2.5 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent select-none cursor-pointer"
               >
                 <option value="">All Channels</option>
                 <option value="website">Website</option>
@@ -436,14 +436,14 @@ export default function ChatLogsPage() {
           </div>
 
           {/* Date range filters */}
-          <div className="flex flex-wrap sm:flex-nowrap gap-3 items-center w-full md:w-auto pt-2 md:pt-0 border-t border-slate-100 md:border-t-0">
+          <div className="flex flex-wrap sm:flex-nowrap gap-3 items-center w-full md:w-auto pt-2 md:pt-0 border-t border-slate-100 dark:border-slate-800 md:border-t-0">
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
+                className="border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-250 text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 cursor-pointer"
                 title="Start Date"
               />
             </div>
@@ -452,7 +452,7 @@ export default function ChatLogsPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 w-full sm:w-auto cursor-pointer"
+              className="border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-250 text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 w-full sm:w-auto cursor-pointer"
               title="End Date"
             />
             
@@ -615,28 +615,28 @@ export default function ChatLogsPage() {
           <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs animate-fade-in" onClick={() => setSelectedSessionId(null)} />
           
           {/* Modal Panel */}
-          <div className="bg-white border border-slate-200 shadow-xl rounded-2xl w-full max-w-3xl h-[85vh] flex flex-col relative z-10 animate-scale-in overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl w-full max-w-3xl h-[85vh] flex flex-col relative z-10 animate-scale-in overflow-hidden">
             
             {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
               <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-slate-600" />
+                <MessageSquare className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800 tracking-tight">Chatbot Dialogue Transcript</h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5 font-mono">Session ID: {selectedSessionId}</p>
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-tight">Chatbot Dialogue Transcript</h3>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 font-mono">Session ID: {selectedSessionId}</p>
                 </div>
               </div>
               <button 
                 type="button" 
                 onClick={() => setSelectedSessionId(null)}
-                className="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350 focus:outline-none transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Message Stream */}
-            <div className="flex-1 p-6 overflow-y-auto bg-slate-50/45 space-y-6">
+            <div className="flex-1 p-6 overflow-y-auto bg-slate-50/45 dark:bg-slate-950/40 space-y-6">
               {transcriptLoading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
                   <svg className="animate-spin h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24">
@@ -646,7 +646,7 @@ export default function ChatLogsPage() {
                   <span className="text-xs font-semibold uppercase tracking-wider">Syncing transcript logs...</span>
                 </div>
               ) : messages.length === 0 ? (
-                <p className="text-xs text-slate-400 text-center py-12">No messages logged in this session.</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-12">No messages logged in this session.</p>
               ) : (
                 <div className="space-y-6 max-w-2xl mx-auto">
                   {messages.map((msg, index) => (
@@ -655,14 +655,14 @@ export default function ChatLogsPage() {
                       {/* 1. Patient query (right-aligned, slate backdrop) */}
                       <div className="flex items-start justify-end gap-3">
                         <div className="flex flex-col items-end max-w-[80%]">
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
                             <span>{msg.user_name || 'Anonymous Patient'}</span>
                             <User className="h-3 w-3" />
                           </span>
-                          <div className="bg-slate-900 text-white p-4 rounded-2xl rounded-tr-xs text-sm shadow-sm border border-slate-950 font-medium leading-relaxed">
+                          <div className="bg-slate-900 dark:bg-slate-850 text-white dark:text-slate-55 p-4 rounded-2xl rounded-tr-xs text-sm shadow-sm border border-slate-950 dark:border-slate-800 font-medium leading-relaxed">
                             {msg.user_input}
                           </div>
-                          <span className="text-[9px] text-slate-400 mt-1 font-medium">
+                          <span className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-medium">
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
@@ -671,17 +671,17 @@ export default function ChatLogsPage() {
                       {/* 2. AI grounding response (left-aligned, light gray/blue backdrop) */}
                       <div className="flex items-start gap-3">
                         <div className="flex flex-col items-start max-w-[80%]">
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
                             <Bot className="h-3 w-3 text-sky-600" />
-                            <span className="text-slate-700">Procare Assistant</span>
+                            <span className="text-slate-700 dark:text-slate-300">Procare Assistant</span>
                           </span>
-                          <div className="bg-white border border-slate-200/90 text-slate-700 p-4 rounded-2xl rounded-tl-xs text-sm shadow-xs leading-relaxed">
+                          <div className="bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-slate-700 dark:text-slate-200 p-4 rounded-2xl rounded-tl-xs text-sm shadow-xs leading-relaxed">
                             {msg.ai_response}
                           </div>
                           
                           {/* Grounding and Response Telemetry */}
                           <div className="flex flex-wrap items-center gap-2 mt-2">
-                            <span className="text-[9px] text-slate-400 font-medium">
+                            <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">
                               {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             <span className="text-[9px] text-slate-300">|</span>
@@ -702,7 +702,7 @@ export default function ChatLogsPage() {
                             {msg.total_tokens && (
                               <>
                                 <span className="text-[9px] text-slate-300">|</span>
-                                <span className="text-[9px] text-slate-400 font-semibold bg-slate-100 px-1 py-0.2 rounded border border-slate-200/50">
+                                <span className="text-[9px] text-slate-400 dark:text-slate-450 font-semibold bg-slate-100 dark:bg-slate-950 px-1 py-0.2 rounded border border-slate-200/50 dark:border-slate-800">
                                   Tokens: {msg.total_tokens}
                                 </span>
                               </>
@@ -711,7 +711,7 @@ export default function ChatLogsPage() {
                             {msg.max_similarity_score !== null && (
                               <>
                                 <span className="text-[9px] text-slate-300">|</span>
-                                <span className="text-[9px] text-slate-400 font-semibold bg-slate-100 px-1 py-0.2 rounded border border-slate-200/50">
+                                <span className="text-[9px] text-slate-400 dark:text-slate-450 font-semibold bg-slate-100 dark:bg-slate-950 px-1 py-0.2 rounded border border-slate-200/50 dark:border-slate-800">
                                   Similarity: {Number(msg.max_similarity_score).toFixed(2)}
                                 </span>
                               </>
@@ -727,7 +727,7 @@ export default function ChatLogsPage() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+            <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 flex justify-end">
               <Button variant="secondary" size="sm" onClick={() => setSelectedSessionId(null)}>
                 <span>Close</span>
               </Button>
