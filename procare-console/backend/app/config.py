@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     CONSOLE_ADMIN_EMAILS: str = "admin@example.com"
     
     # CORS configuration
-    ALLOWED_ORIGINS: list[str] = [
+    ALLOWED_ORIGINS: list[str] | str = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:3001",

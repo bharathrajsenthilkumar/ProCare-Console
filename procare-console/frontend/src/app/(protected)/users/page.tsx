@@ -43,6 +43,7 @@ interface Session {
 
 export default function UsersPage() {
   const { session } = useAuth();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +83,6 @@ export default function UsersPage() {
     setError(null);
     setSelectedUserIds([]); // Reset selection on page refresh/fetch
     
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
     let url = `${apiUrl}/users?page=${page}&limit=${limit}`;
     if (debouncedSearch) {
       url += `&search=${encodeURIComponent(debouncedSearch)}`;
@@ -124,7 +124,6 @@ export default function UsersPage() {
     
     async function fetchUserDetail() {
       setDetailLoading(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       
       try {
         const response = await fetch(`${apiUrl}/users/${selectedUserId}`, {
@@ -166,7 +165,6 @@ export default function UsersPage() {
     if (!session) return;
     setExportLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       const response = await fetch(`${apiUrl}/users/export`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -196,7 +194,6 @@ export default function UsersPage() {
     if (!session || selectedUserIds.length === 0) return;
     setDeleteLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       const response = await fetch(`${apiUrl}/users`, {
         method: 'DELETE',
         headers: {

@@ -32,6 +32,7 @@ interface SystemLog {
 
 export default function LogsPage() {
   const { session } = useAuth();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
   const [logs, setLogs] = useState<SystemLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +59,6 @@ export default function LogsPage() {
     setError(null);
     setSelectedLogIds([]); // Reset selection on fetch
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
     let url = `${apiUrl}/system-logs?page=${page}&limit=${limit}`;
     if (levelFilter) {
       url += `&level=${encodeURIComponent(levelFilter)}`;
@@ -111,7 +111,6 @@ export default function LogsPage() {
     if (!session) return;
     setExportLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       const response = await fetch(`${apiUrl}/system-logs/export`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -141,7 +140,6 @@ export default function LogsPage() {
     if (!session || selectedLogIds.length === 0) return;
     setDeleteLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       const response = await fetch(`${apiUrl}/system-logs`, {
         method: 'DELETE',
         headers: {

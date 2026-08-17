@@ -56,6 +56,7 @@ interface ChatMessage {
 
 export default function ChatLogsPage() {
   const { session } = useAuth();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +105,6 @@ export default function ChatLogsPage() {
     setError(null);
     setSelectedSessionIds([]); // Reset checkbox selection on reload
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
     let url = `${apiUrl}/chat-logs?page=${page}&limit=${limit}`;
     
     if (debouncedSearch) {
@@ -156,7 +156,6 @@ export default function ChatLogsPage() {
 
     async function fetchTranscript() {
       setTranscriptLoading(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
 
       try {
         const response = await fetch(`${apiUrl}/chat-logs/${selectedSessionId}`, {
@@ -197,7 +196,6 @@ export default function ChatLogsPage() {
     if (!session) return;
     setExportLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       const response = await fetch(`${apiUrl}/chat-logs/export`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -227,7 +225,6 @@ export default function ChatLogsPage() {
     if (!session || selectedSessionIds.length === 0) return;
     setDeleteLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       const response = await fetch(`${apiUrl}/chat-logs`, {
         method: 'DELETE',
         headers: {
@@ -254,7 +251,6 @@ export default function ChatLogsPage() {
     if (!session) return;
     setDeleteLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
       const response = await fetch(`${apiUrl}/chat-logs/cleanup?days=${cleanupDays}`, {
         method: 'DELETE',
         headers: {

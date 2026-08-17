@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Stethoscope, Lock, Mail, AlertCircle, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, AlertCircle, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
@@ -54,9 +54,9 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm relative z-10">
         <div>
           {/* Logo / Branding */}
-          <div className="flex justify-center items-center gap-2">
-            <div className="p-2.5 bg-slate-900 text-white rounded-xl shadow-sm">
-              <Stethoscope className="h-6 w-6" />
+          <div className="flex justify-center items-center gap-2.5">
+            <div className="relative h-12 w-12 flex items-center justify-center shrink-0">
+              <img src="/logo.png" alt="ProCare Logo" className="h-full w-full object-contain" />
             </div>
             <span className="text-2xl font-bold tracking-tight text-slate-900">
               Procare<span className="text-sky-600 font-semibold">Console</span>

@@ -75,7 +75,7 @@ export default function StoragePage() {
   const [exportUsersLoading, setExportUsersLoading] = useState(false);
   const [exportChatsLoading, setExportChatsLoading] = useState(false);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
 
   const fetchStorageMetrics = async () => {
     if (!session) return;

@@ -19,3 +19,6 @@ pyvenv.cfg
 .idea/
 *.swp
 *.swo
+
+.vercel
+.env*

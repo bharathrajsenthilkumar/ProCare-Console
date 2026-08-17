@@ -63,7 +63,7 @@ export default function AppointmentsPage() {
     setLoading(true);
     setError(null);
     
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api/v1';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
     let url = `${apiUrl}/appointments?page=${page}&limit=${limit}`;
     
     if (debouncedSearch) {
