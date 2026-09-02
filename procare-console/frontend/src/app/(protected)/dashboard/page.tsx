@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
+import { AiModelToggle } from '@/components/AiModelToggle';
 
 interface Stats {
   total_users: number;
@@ -339,6 +340,9 @@ export default function DashboardPage() {
         </div>
       )}
 
+
+      {/* Global AI Chatbot Model Toggle Switch */}
+      <AiModelToggle />
 
       {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

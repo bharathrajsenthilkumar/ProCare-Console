@@ -5,11 +5,13 @@ import {
   Bell, 
   Sun, 
   Moon, 
-  Palette
+  Palette,
+  Bot
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { AiModelToggle } from '@/components/AiModelToggle';
 
 export default function SettingsPage() {
   // Appearance State
@@ -45,9 +47,12 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <PageHeader 
         title="Console Configurations" 
-        description="Configure notification preferences and manage interface appearance themes."
+        description="Manage AI chatbot engines, configure notification preferences, and customize interface appearance."
         actions={<Badge variant="success">Active System Config</Badge>}
       />
+
+      {/* Global AI Model Toggle Section */}
+      <AiModelToggle />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
@@ -130,7 +135,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => handleThemeChange('light')}
-                  className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border transition-all ${
+                  className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border transition-all cursor-pointer ${
                     theme === 'light'
                       ? 'border-slate-900 bg-slate-50 text-slate-900 font-bold ring-1 ring-slate-900 dark:border-sky-500 dark:text-sky-400 dark:bg-sky-950/20 dark:ring-sky-500'
                       : 'border-slate-200 hover:border-slate-350 text-slate-500 bg-white hover:bg-slate-50/50 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-800/50 dark:bg-slate-900'
@@ -143,7 +148,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => handleThemeChange('dark')}
-                  className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border transition-all ${
+                  className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border transition-all cursor-pointer ${
                     theme === 'dark'
                       ? 'border-slate-900 bg-slate-50 text-slate-900 font-bold ring-1 ring-slate-900 dark:border-sky-500 dark:text-sky-400 dark:bg-sky-950/20 dark:ring-sky-500'
                       : 'border-slate-200 hover:border-slate-350 text-slate-500 bg-white hover:bg-slate-50/50 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-800/50 dark:bg-slate-900'
