@@ -165,7 +165,7 @@ export default function DashboardPage() {
           setBackendStatus('error');
         }
       } catch (error) {
-        console.error('Error connecting to backend API:', error);
+        console.warn('Backend API temporarily unavailable, using offline fallback state:', error);
         setBackendStatus('error');
       } finally {
         setLoading(false);
