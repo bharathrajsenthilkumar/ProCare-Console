@@ -101,10 +101,16 @@ export default function GalleryPage() {
     fetchItems();
   }, [session]);
 
-  // Intercept file selection and open cropper
+  // Intercept file selection and open cropper (max 10MB)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        setFormError('File size exceeds 10MB. Please select an image under 10MB.');
+        e.target.value = '';
+        return;
+      }
+      setFormError(null);
       setRawCropFile(file);
       setIsCropperOpen(true);
       // Reset input value to allow re-selection of the same file
@@ -244,9 +250,55 @@ export default function GalleryPage() {
     }
   };
 
+  // Handle drag-and-drop reordering
+  const handleReorder = async (newItems: GalleryItem[]) => {
+    const reorderedWithOrder = newItems.map((item, index) => ({
+      ...item,
+      display_order: index,
+    }));
+    setItems(reorderedWithOrder);
+
+    if (!session) return;
+
+    try {
+      const payload = reorderedWithOrder.map((item) => ({
+        id: item.id,
+        display_order: item.display_order,
+      }));
+
+      const res = await fetch(`${apiUrl}/gallery/reorder`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        // Fallback: update sequentially
+        await Promise.all(
+          reorderedWithOrder.map((item) => {
+            const fd = new FormData();
+            fd.append('display_order', item.display_order.toString());
+            return fetch(`${apiUrl}/gallery/${item.id}`, {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+              },
+              body: fd,
+            });
+          })
+        );
+      }
+    } catch (err) {
+      console.error('Failed to update gallery reorder:', err);
+    }
+  };
+
   const openAddModal = () => {
     setSelectedFile(null);
-    setDisplayOrder(0);
+    setDisplayOrder(items.length);
     setIsActive(true);
     setFormError(null);
     setIsAddOpen(true);
@@ -268,6 +320,14 @@ export default function GalleryPage() {
 
   const columns: Column<GalleryItem>[] = [
     {
+      header: 'Position',
+      accessor: (row) => (
+        <Badge variant="info" className="font-mono">
+          #{row.display_order + 1}
+        </Badge>
+      ),
+    },
+    {
       header: 'Preview',
       accessor: (row) => (
         <div className="relative w-16 h-12 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
@@ -288,14 +348,6 @@ export default function GalleryPage() {
         const filename = row.image_path.split('/').pop()?.split('?')[0] || 'Image';
         return <span className="font-medium text-slate-700 dark:text-slate-200 truncate max-w-xs block">{decodeURIComponent(filename)}</span>;
       },
-    },
-    {
-      header: 'Display Order',
-      accessor: (row) => (
-        <Badge variant="info" className="font-mono">
-          {row.display_order}
-        </Badge>
-      ),
     },
     {
       header: 'Status',
@@ -387,6 +439,8 @@ export default function GalleryPage() {
               data={items} 
               columns={columns} 
               keyExtractor={(row) => row.id.toString()}
+              isDraggable={true}
+              onReorder={handleReorder}
             />
           </CardContent>
         </Card>
@@ -395,7 +449,7 @@ export default function GalleryPage() {
       {/* --- ADD MODAL --- */}
       {isAddOpen && (
         <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-xl w-full overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
               <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Add Gallery Image</h3>
               <button onClick={() => setIsAddOpen(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350 transition-colors">
@@ -420,7 +474,7 @@ export default function GalleryPage() {
                     <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
                       {selectedFile ? selectedFile.name : 'Click to Upload Image'}
                     </span>
-                    <span className="text-xs text-slate-400 dark:text-slate-550">Supports JPG, PNG, WEBP, GIF (Max 5MB)</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-550">Supports JPG, PNG, WEBP, GIF (Max 10MB)</span>
                   </div>
                   <input 
                     type="file" 
@@ -430,30 +484,21 @@ export default function GalleryPage() {
                     accept="image/*"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Display Sequence</label>
-                    <Input 
-                      type="number" 
-                      value={displayOrder}
-                      onChange={(e) => setDisplayOrder(parseInt(e.target.value) || 0)}
-                      min="0"
-                    />
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status & Visibility</label>
+                  <div className="flex items-center justify-between h-10 border border-slate-200 dark:border-slate-800 rounded-lg px-3 bg-white dark:bg-slate-950">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-300 font-medium">
+                      <input 
+                        type="checkbox" 
+                        checked={isActive}
+                        onChange={(e) => setIsActive(e.target.checked)}
+                        className="rounded border-slate-300 text-slate-600 focus:ring-slate-500 w-4 h-4"
+                      />
+                      Visible on website
+                    </label>
+                    <span className="text-[11px] text-slate-400 font-medium">Auto-placed at #{items.length + 1}</span>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Status</label>
-                    <div className="flex items-center h-10 border border-slate-200 dark:border-slate-855 rounded-lg px-3 bg-white dark:bg-slate-950">
-                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 dark:text-slate-300 font-medium">
-                        <input 
-                          type="checkbox" 
-                          checked={isActive}
-                          onChange={(e) => setIsActive(e.target.checked)}
-                          className="rounded border-slate-300 text-slate-600 focus:ring-slate-500 w-4 h-4"
-                        />
-                        Visible on website
-                      </label>
-                    </div>
-                  </div>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">You can drag and drop rows in the table anytime to reorder slides.</p>
                 </div>
               </div>
               <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
@@ -470,7 +515,7 @@ export default function GalleryPage() {
       {/* --- EDIT MODAL --- */}
       {isEditOpen && editItem && (
         <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-xl w-full overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
               <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Edit Gallery Item</h3>
               <button onClick={() => setIsEditOpen(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350 transition-colors">
@@ -536,30 +581,21 @@ export default function GalleryPage() {
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Display Sequence</label>
-                    <Input 
-                      type="number" 
-                      value={displayOrder}
-                      onChange={(e) => setDisplayOrder(parseInt(e.target.value) || 0)}
-                      min="0"
-                    />
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Visibility Status</label>
+                  <div className="flex items-center justify-between h-10 border border-slate-200 dark:border-slate-800 rounded-lg px-3 bg-white dark:bg-slate-950">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-300 font-medium">
+                      <input 
+                        type="checkbox" 
+                        checked={isActive}
+                        onChange={(e) => setIsActive(e.target.checked)}
+                        className="rounded border-slate-300 text-slate-600 focus:ring-slate-500 w-4 h-4"
+                      />
+                      Visible on website
+                    </label>
+                    <span className="text-[11px] text-slate-400 font-medium">Current Position: #{editItem.display_order + 1}</span>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Status</label>
-                    <div className="flex items-center h-10 border border-slate-200 dark:border-slate-855 rounded-lg px-3 bg-white dark:bg-slate-950">
-                      <label className="flex items-center gap-2 cursor-pointer w-full text-sm text-slate-600 dark:text-slate-300 font-medium">
-                        <input 
-                          type="checkbox" 
-                          checked={isActive}
-                          onChange={(e) => setIsActive(e.target.checked)}
-                          className="rounded border-slate-300 text-slate-600 focus:ring-slate-500 w-4 h-4"
-                        />
-                        Visible on website
-                      </label>
-                    </div>
-                  </div>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">To reorder, drag and drop the table row in the gallery list.</p>
                 </div>
               </div>
               <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">

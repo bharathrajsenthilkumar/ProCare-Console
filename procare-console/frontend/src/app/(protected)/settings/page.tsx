@@ -22,20 +22,20 @@ export default function SettingsPage() {
   const [securityAlerts, setSecurityAlerts] = useState(true);
   const [weeklyReports, setWeeklyReports] = useState(false);
 
-  // Load and apply theme from localStorage
+  // Sync initial UI state from the active document/storage without altering DOM classes on mount
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
-    setTheme(savedTheme);
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    if (typeof window === 'undefined') return;
+    const isDark = document.documentElement.classList.contains('dark') || localStorage.getItem('theme') === 'dark';
+    setTheme(isDark ? 'dark' : 'light');
   }, []);
 
+  // Theme only changes when the administrator explicitly clicks a button
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    try {
+      localStorage.setItem('theme', newTheme);
+    } catch (_) {}
+
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -130,18 +130,18 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="!p-6 space-y-4">
             <div className="space-y-3">
-              <span className="text-xs font-bold text-slate-550 dark:text-slate-300 block uppercase tracking-wider">Interface Theme Mode</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">Interface Theme Mode</span>
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => handleThemeChange('light')}
                   className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border transition-all cursor-pointer ${
                     theme === 'light'
-                      ? 'border-slate-900 bg-slate-50 text-slate-900 font-bold ring-1 ring-slate-900 dark:border-sky-500 dark:text-sky-400 dark:bg-sky-950/20 dark:ring-sky-500'
-                      : 'border-slate-200 hover:border-slate-350 text-slate-500 bg-white hover:bg-slate-50/50 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-800/50 dark:bg-slate-900'
+                      ? 'border-sky-500 bg-sky-50/70 text-sky-950 font-bold ring-2 ring-sky-500 shadow-xs dark:border-sky-500 dark:text-sky-300 dark:bg-sky-950/30 dark:ring-sky-500'
+                      : 'border-slate-200 hover:border-slate-300 text-slate-500 bg-white hover:bg-slate-50 dark:text-slate-400 dark:border-slate-800 dark:hover:bg-slate-800/50 dark:bg-slate-900'
                   }`}
                 >
-                  <Sun className={`h-6 w-6 ${theme === 'light' ? 'text-sky-500' : 'text-slate-400'}`} />
+                  <Sun className={`h-6 w-6 ${theme === 'light' ? 'text-amber-500' : 'text-slate-400'}`} />
                   <span className="text-xs font-semibold">Light Theme</span>
                 </button>
 
@@ -150,11 +150,11 @@ export default function SettingsPage() {
                   onClick={() => handleThemeChange('dark')}
                   className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border transition-all cursor-pointer ${
                     theme === 'dark'
-                      ? 'border-slate-900 bg-slate-50 text-slate-900 font-bold ring-1 ring-slate-900 dark:border-sky-500 dark:text-sky-400 dark:bg-sky-950/20 dark:ring-sky-500'
-                      : 'border-slate-200 hover:border-slate-350 text-slate-500 bg-white hover:bg-slate-50/50 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-800/50 dark:bg-slate-900'
+                      ? 'border-indigo-500 bg-indigo-50/70 text-indigo-950 font-bold ring-2 ring-indigo-500 shadow-xs dark:border-indigo-500 dark:text-indigo-300 dark:bg-indigo-950/30 dark:ring-indigo-500'
+                      : 'border-slate-200 hover:border-slate-300 text-slate-500 bg-white hover:bg-slate-50 dark:text-slate-400 dark:border-slate-800 dark:hover:bg-slate-800/50 dark:bg-slate-900'
                   }`}
                 >
-                  <Moon className={`h-6 w-6 ${theme === 'dark' ? 'text-violet-400' : 'text-slate-400'}`} />
+                  <Moon className={`h-6 w-6 ${theme === 'dark' ? 'text-violet-500 dark:text-violet-400' : 'text-slate-400'}`} />
                   <span className="text-xs font-semibold">Dark Theme</span>
                 </button>
               </div>

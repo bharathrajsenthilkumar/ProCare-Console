@@ -118,7 +118,7 @@ export function AiModelToggle({ className = '', onModelChange }: AiModelTogglePr
 
       setStatusMessage({
         type: 'success',
-        text: `Global chatbot switched to ${nextModel === 'gemini' ? 'Gemini 3.5 Flash' : 'Groq Llama 3.3'}`,
+        text: `Global chatbot switched to ${nextModel === 'gemini' ? 'Gemini 3.5 Flash' : 'OpenAI GPT-OSS 20B'}`,
       });
 
       // Auto-clear message after 4s
@@ -169,20 +169,20 @@ export function AiModelToggle({ className = '', onModelChange }: AiModelTogglePr
                   </>
                 ) : (
                   <>
-                    <Zap className="h-3 w-3" /> Active: Groq
+                    <Zap className="h-3 w-3" /> Active: GPT-OSS
                   </>
                 )}
               </span>
             )}
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Seamlessly switch between Google Gemini and Groq Llama for patient inquiries.
+            Seamlessly switch between Google Gemini and OpenAI GPT-OSS for patient inquiries.
           </p>
         </div>
 
         {/* Model Identifier Pill */}
         <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/50 px-2.5 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-800 self-start sm:self-auto">
-          {isGemini ? 'gemini-3.5-flash-lite' : 'llama-3.3-70b-versatile'}
+          {isGemini ? 'gemini-3.5-flash-lite' : 'openai/gpt-oss-20b'}
         </div>
       </div>
 
@@ -225,7 +225,7 @@ export function AiModelToggle({ className = '', onModelChange }: AiModelTogglePr
             type="button"
             role="switch"
             aria-checked={!isGemini}
-            aria-label="Toggle AI model between Gemini and Groq"
+            aria-label="Toggle AI model between Gemini and GPT-OSS"
             disabled={updating || loading}
             onClick={handleToggle}
             className={`relative inline-flex h-9 w-18 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
@@ -255,7 +255,7 @@ export function AiModelToggle({ className = '', onModelChange }: AiModelTogglePr
           </span>
         </div>
 
-        {/* Right Option: Groq */}
+        {/* Right Option: GPT-OSS */}
         <button
           type="button"
           onClick={() => !isGemini ? null : handleToggle()}
@@ -272,10 +272,10 @@ export function AiModelToggle({ className = '', onModelChange }: AiModelTogglePr
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
-                  Groq Llama 3.3
+                  OpenAI GPT-OSS 20B
                 </span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                  High-Speed LPU Inference
+                  Open-Source Foundation Model
                 </span>
               </div>
             </div>

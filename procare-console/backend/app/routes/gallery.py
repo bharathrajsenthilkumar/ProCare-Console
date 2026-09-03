@@ -1,15 +1,35 @@
 import os
 import uuid
+from pydantic import BaseModel
+from typing import List
 from urllib.parse import unquote
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from app.auth import get_current_user, require_console_admin, supabase_admin_client
 
 router = APIRouter(prefix="/gallery", tags=["gallery"])
 
+class ReorderItem(BaseModel):
+    id: int
+    display_order: int
+
 @router.get("")
 async def list_gallery_items(current_user: dict = Depends(get_current_user)):
     res = supabase_admin_client.table("gallery_images").select("*").order("display_order", desc=False).execute()
     return res.data or []
+
+@router.post("/reorder")
+async def reorder_gallery_items(
+    items: List[ReorderItem],
+    current_user: dict = Depends(require_console_admin)
+):
+    try:
+        for item in items:
+            supabase_admin_client.table("gallery_images").update({
+                "display_order": item.display_order
+            }).eq("id", item.id).execute()
+        return {"status": "success", "message": "Gallery sequence updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update gallery sequence: {str(e)}")
 
 @router.get("/{id}")
 async def get_gallery_item(id: int, current_user: dict = Depends(get_current_user)):
@@ -34,8 +54,8 @@ async def create_gallery_item(
         
     # 2. Size limit
     file_bytes = await file.read()
-    if len(file_bytes) > 5 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="File size exceeds 5MB")
+    if len(file_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size exceeds 10MB")
         
     # 3. Upload to storage
     unique_name = f"{uuid.uuid4().hex}{ext}"
@@ -103,8 +123,8 @@ async def update_gallery_item(
             raise HTTPException(status_code=400, detail="Invalid image MIME type")
             
         file_bytes = await file.read()
-        if len(file_bytes) > 5 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="File size exceeds 5MB")
+        if len(file_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File size exceeds 10MB")
             
         new_filename = f"{uuid.uuid4().hex}{ext}"
         try:

@@ -14,7 +14,9 @@ import {
   AlertCircle,
   HardDrive,
   Database,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -22,7 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
-import { AiModelToggle } from '@/components/AiModelToggle';
+import { supabase } from '@/lib/supabase';
 
 interface Stats {
   total_users: number;
@@ -120,8 +122,42 @@ export default function DashboardPage() {
   const [storageMetrics, setStorageMetrics] = useState<StorageMetrics | null>(null);
   const [storageLoading, setStorageLoading] = useState(true);
   const [storageError, setStorageError] = useState<string | null>(null);
+  const [activeModel, setActiveModel] = useState<'gemini' | 'groq'>('gemini');
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
+
+  // Fetch active chatbot model from Supabase or localStorage
+  useEffect(() => {
+    const fetchActiveModel = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('system_settings')
+          .select('active_chatbot_model')
+          .limit(1)
+          .maybeSingle();
+
+        if (!error && data?.active_chatbot_model) {
+          const model = data.active_chatbot_model as 'gemini' | 'groq';
+          setActiveModel(model);
+          try {
+            localStorage.setItem('active_chatbot_model', model);
+          } catch (_) {}
+        } else {
+          const local = localStorage.getItem('active_chatbot_model') as 'gemini' | 'groq';
+          if (local === 'gemini' || local === 'groq') {
+            setActiveModel(local);
+          }
+        }
+      } catch (err) {
+        const local = localStorage.getItem('active_chatbot_model') as 'gemini' | 'groq';
+        if (local === 'gemini' || local === 'groq') {
+          setActiveModel(local);
+        }
+      }
+    };
+
+    fetchActiveModel();
+  }, []);
 
   const fetchStorageMetrics = async () => {
     if (!session) return;
@@ -307,12 +343,36 @@ export default function DashboardPage() {
         title="Administrative Overview" 
         description="Console diagnostics status, resource summaries, and active chatbots exchanges."
         actions={
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-semibold shadow-xs">
-            <Server className={`h-4 w-4 ${backendStatus === 'connected' ? 'text-emerald-500' : 'text-slate-400'}`} />
-            <span>API Status:</span>
-            {backendStatus === 'checking' && <span className="text-slate-400 animate-pulse">Scanning...</span>}
-            {backendStatus === 'connected' && <span className="text-emerald-600 dark:text-emerald-400 font-bold">Online</span>}
-            {backendStatus === 'error' && <span className="text-red-500 font-bold">Offline</span>}
+          <div className="flex items-center gap-3">
+            {/* Active Model Quick Status Badge linking to Settings */}
+            <Link 
+              href="/settings"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold shadow-xs hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-sm transition-all group cursor-pointer"
+            >
+              {activeModel === 'gemini' ? (
+                <Sparkles className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+              ) : (
+                <Zap className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              )}
+              <span className="text-slate-500 dark:text-slate-400">Model:</span>
+              <span className={`font-bold ${
+                activeModel === 'gemini' 
+                  ? 'text-sky-600 dark:text-sky-400' 
+                  : 'text-amber-600 dark:text-amber-400'
+              }`}>
+                {activeModel === 'gemini' ? 'Gemini 3.5' : 'GPT-OSS 20B'}
+              </span>
+              <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-sky-500 transition-colors" />
+            </Link>
+
+            {/* API Status */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-semibold shadow-xs">
+              <Server className={`h-4 w-4 ${backendStatus === 'connected' ? 'text-emerald-500' : 'text-slate-400'}`} />
+              <span>API Status:</span>
+              {backendStatus === 'checking' && <span className="text-slate-400 animate-pulse">Scanning...</span>}
+              {backendStatus === 'connected' && <span className="text-emerald-600 dark:text-emerald-400 font-bold">Online</span>}
+              {backendStatus === 'error' && <span className="text-red-500 font-bold">Offline</span>}
+            </div>
           </div>
         }
       />
@@ -341,8 +401,50 @@ export default function DashboardPage() {
       )}
 
 
-      {/* Global AI Chatbot Model Toggle Switch */}
-      <AiModelToggle />
+      {/* Active AI Chatbot Model Status Indicator Card */}
+      <Link href="/settings" className="block group cursor-pointer">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/90 bg-white shadow-xs hover:border-slate-350 hover:shadow-md transition-all dark:border-slate-800 dark:bg-slate-900/90 dark:hover:border-slate-700">
+          <div className="flex items-center gap-3.5">
+            <div className={`p-2.5 rounded-xl flex items-center justify-center shrink-0 ${
+              activeModel === 'gemini'
+                ? 'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400'
+                : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400'
+            }`}>
+              {activeModel === 'gemini' ? (
+                <Sparkles className="h-5 w-5" />
+              ) : (
+                <Zap className="h-5 w-5" />
+              )}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Active Chatbot Engine
+                </span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold ${
+                  activeModel === 'gemini'
+                    ? 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300'
+                    : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                }`}>
+                  {activeModel === 'gemini' ? 'Google Gemini 3.5 Flash Lite' : 'OpenAI GPT-OSS 20B'}
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-md">
+                  Active
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {activeModel === 'gemini'
+                  ? 'Clinical AI diagnostic chatbot model is active. Click to configure in Settings.'
+                  : 'Open-source foundation chatbot model is active. Click to configure in Settings.'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-600 group-hover:text-sky-700 dark:text-sky-400 dark:group-hover:text-sky-300 transition-colors shrink-0">
+            <span>Configure in Settings</span>
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </div>
+        </div>
+      </Link>
 
       {/* Stats Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

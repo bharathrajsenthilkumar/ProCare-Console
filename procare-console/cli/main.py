@@ -6,17 +6,21 @@ from cli.db import insert_query
 
 # Exact model identifiers required by the architecture
 MODEL_GEMINI = "gemini-3.5-flash-lite"
-MODEL_GROQ = "llama-3.3-70b-versatile"
+MODEL_GPT_OSS = "openai/gpt-oss-20b"
 DEFAULT_MODEL = MODEL_GEMINI
 
 MODEL_MAPPING = {
     "gemini": MODEL_GEMINI,
     "gemini-3.5-flash-lite": MODEL_GEMINI,
     "1": MODEL_GEMINI,
-    "groq": MODEL_GROQ,
-    "llama": MODEL_GROQ,
-    "llama-3.3-70b-versatile": MODEL_GROQ,
-    "2": MODEL_GROQ,
+    "openai": MODEL_GPT_OSS,
+    "gpt-oss": MODEL_GPT_OSS,
+    "gpt-oss-20b": MODEL_GPT_OSS,
+    "openai/gpt-oss-20b": MODEL_GPT_OSS,
+    "groq": MODEL_GPT_OSS,
+    "llama": MODEL_GPT_OSS,
+    "llama-3.3-70b-versatile": MODEL_GPT_OSS,
+    "2": MODEL_GPT_OSS,
 }
 
 def resolve_model(model_input: Optional[str]) -> str:
@@ -33,7 +37,7 @@ def prompt_model_selection() -> str:
     print("=" * 60)
     print("Please choose an AI model for this session:")
     print(f"  [1] Gemini 3.5 Flash Lite (Default)  -> {MODEL_GEMINI}")
-    print(f"  [2] Groq Llama 3.3 70B               -> {MODEL_GROQ}")
+    print(f"  [2] OpenAI GPT-OSS 20B               -> {MODEL_GPT_OSS}")
     print("-" * 60)
     
     try:
@@ -98,7 +102,7 @@ def main():
             "Model selection before session starts.\n"
             "Options:\n"
             f"  - gemini / gemini-3.5-flash-lite (Default: {MODEL_GEMINI})\n"
-            f"  - groq / llama-3.3-70b-versatile ({MODEL_GROQ})"
+            f"  - openai / openai/gpt-oss-20b ({MODEL_GPT_OSS})"
         )
     )
     parser.add_argument(
