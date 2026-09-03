@@ -14,7 +14,8 @@ import {
   X, 
   AlertTriangle, 
   RefreshCw,
-  Award
+  Award,
+  Crop
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -23,6 +24,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent } from '@/components/ui/Card';
 import { DataTable, Column } from '@/components/ui/DataTable';
+import { ImageCropperModal } from '@/components/ui/ImageCropperModal';
 
 interface TeamMember {
   id: number;
@@ -51,6 +53,9 @@ export default function TeamPage() {
   const [displayOrder, setDisplayOrder] = useState<number>(0);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFilePreview, setSelectedFilePreview] = useState<string | null>(null);
+  const [rawCropFile, setRawCropFile] = useState<File | string | null>(null);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [editMember, setEditMember] = useState<TeamMember | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -59,6 +64,19 @@ export default function TeamPage() {
   const editFileInputRef = useRef<HTMLInputElement>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
+
+  // Generate preview for selectedFile and ensure proper cleanup
+  useEffect(() => {
+    if (!selectedFile) {
+      setSelectedFilePreview(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setSelectedFilePreview(objectUrl);
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [selectedFile]);
 
   // Load team
   const fetchMembers = async () => {
@@ -88,10 +106,32 @@ export default function TeamPage() {
     fetchMembers();
   }, [session]);
 
+  // Intercept file selection and open cropper
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setRawCropFile(file);
+      setIsCropperOpen(true);
+      // Reset input value to allow re-selection of the same file
+      e.target.value = '';
     }
+  };
+
+  const handleTriggerRecrop = (source: File | string) => {
+    if (!source) return;
+    setRawCropFile(source);
+    setIsCropperOpen(true);
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCropperOpen(false);
+    setRawCropFile(null);
+  };
+
+  const handleCropperClose = () => {
+    setIsCropperOpen(false);
+    setRawCropFile(null);
   };
 
   // Add Member
@@ -502,28 +542,54 @@ export default function TeamPage() {
                   </div>
                 )}
                 
-                <div className="flex items-center gap-4">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-center flex-shrink-0">
-                    <img src={editMember.image_path} className="w-full h-full object-cover object-top" alt="Current" />
-                  </div>
-                  <div className="space-y-1.5 flex-1">
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Replace Profile Image (Optional)</label>
-                    <div 
-                      onClick={() => editFileInputRef.current?.click()}
-                      className="border border-dashed border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 rounded-xl p-2.5 text-center cursor-pointer bg-slate-50 dark:bg-slate-850/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 flex items-center justify-center gap-1.5"
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Staff Avatar {selectedFile && <span className="text-emerald-600 dark:text-emerald-400 font-bold ml-1">(Cropped Staged)</span>}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleTriggerRecrop(selectedFile || editMember.image_path)}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors cursor-pointer"
                     >
-                      <Upload className="w-4 h-4 text-slate-400" />
-                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        {selectedFile ? selectedFile.name : 'Upload New Photo'}
-                      </span>
+                      <Crop className="w-3.5 h-3.5" />
+                      <span>Re-crop Avatar</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div 
+                      onClick={() => handleTriggerRecrop(selectedFile || editMember.image_path)}
+                      className="group relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-center flex-shrink-0 cursor-pointer hover:border-sky-400 dark:hover:border-sky-500 shadow-xs transition-colors"
+                    >
+                      <img 
+                        src={selectedFilePreview || editMember.image_path} 
+                        className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-110" 
+                        alt="Current Avatar" 
+                      />
+                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                        <Crop className="w-4 h-4" />
+                      </div>
                     </div>
-                    <input 
-                      type="file" 
-                      ref={editFileInputRef} 
-                      onChange={handleFileChange}
-                      className="hidden" 
-                      accept="image/*"
-                    />
+
+                    <div className="space-y-1.5 flex-1">
+                      <div 
+                        onClick={() => editFileInputRef.current?.click()}
+                        className="border border-dashed border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 rounded-xl p-2.5 text-center cursor-pointer bg-slate-50 dark:bg-slate-850/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 flex items-center justify-center gap-1.5"
+                      >
+                        <Upload className="w-4 h-4 text-slate-400" />
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                          {selectedFile ? selectedFile.name : 'Upload New Photo'}
+                        </span>
+                      </div>
+                      <input 
+                        type="file" 
+                        ref={editFileInputRef} 
+                        onChange={handleFileChange}
+                        className="hidden" 
+                        accept="image/*"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -613,6 +679,18 @@ export default function TeamPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* --- CROPPER MODAL (1:1 Square) --- */}
+      {isCropperOpen && rawCropFile && (
+        <ImageCropperModal
+          imageFile={rawCropFile}
+          aspectRatio={1}
+          cropShape="round"
+          title="Crop Practitioner Avatar (1:1 Square)"
+          onCropComplete={handleCropComplete}
+          onClose={handleCropperClose}
+        />
       )}
     </div>
   );

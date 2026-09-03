@@ -13,7 +13,8 @@ import {
   Save, 
   X, 
   AlertTriangle, 
-  RefreshCw 
+  RefreshCw,
+  Crop 
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -22,6 +23,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent } from '@/components/ui/Card';
 import { DataTable, Column } from '@/components/ui/DataTable';
+import { ImageCropperModal } from '@/components/ui/ImageCropperModal';
 
 interface GalleryItem {
   id: number;
@@ -44,6 +46,9 @@ export default function GalleryPage() {
 
   // Form Fields State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFilePreview, setSelectedFilePreview] = useState<string | null>(null);
+  const [rawCropFile, setRawCropFile] = useState<File | string | null>(null);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [displayOrder, setDisplayOrder] = useState<number>(0);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [editItem, setEditItem] = useState<GalleryItem | null>(null);
@@ -54,6 +59,19 @@ export default function GalleryPage() {
   const editFileInputRef = useRef<HTMLInputElement>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
+
+  // Generate preview for selectedFile and ensure proper cleanup
+  useEffect(() => {
+    if (!selectedFile) {
+      setSelectedFilePreview(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setSelectedFilePreview(objectUrl);
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [selectedFile]);
 
   // Load items
   const fetchItems = async () => {
@@ -83,11 +101,32 @@ export default function GalleryPage() {
     fetchItems();
   }, [session]);
 
-  // Handle file select
+  // Intercept file selection and open cropper
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setRawCropFile(file);
+      setIsCropperOpen(true);
+      // Reset input value to allow re-selection of the same file
+      e.target.value = '';
     }
+  };
+
+  const handleTriggerRecrop = (source: File | string) => {
+    if (!source) return;
+    setRawCropFile(source);
+    setIsCropperOpen(true);
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCropperOpen(false);
+    setRawCropFile(null);
+  };
+
+  const handleCropperClose = () => {
+    setIsCropperOpen(false);
+    setRawCropFile(null);
   };
 
   // Add Item
@@ -447,10 +486,33 @@ export default function GalleryPage() {
                   </div>
                 )}
                 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Current Image</label>
-                  <div className="relative w-full h-32 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-center">
-                    <img src={editItem.image_path} className="w-full h-full object-cover" alt="Current" />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Current Image {selectedFile && <span className="text-emerald-600 dark:text-emerald-400 font-bold ml-1">(Cropped Staged)</span>}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleTriggerRecrop(selectedFile || editItem.image_path)}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors cursor-pointer"
+                    >
+                      <Crop className="w-3.5 h-3.5" />
+                      <span>Re-crop Image</span>
+                    </button>
+                  </div>
+                  <div 
+                    onClick={() => handleTriggerRecrop(selectedFile || editItem.image_path)}
+                    className="group relative w-full h-36 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-center cursor-pointer transition-all hover:border-sky-400 dark:hover:border-sky-500 shadow-xs"
+                  >
+                    <img 
+                      src={selectedFilePreview || editItem.image_path} 
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                      alt="Current" 
+                    />
+                    <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white text-xs font-bold">
+                      <Crop className="w-4 h-4" />
+                      <span>Click to Re-crop Image</span>
+                    </div>
                   </div>
                 </div>
 
@@ -541,6 +603,17 @@ export default function GalleryPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* --- CROPPER MODAL (16:9 Landscape) --- */}
+      {isCropperOpen && rawCropFile && (
+        <ImageCropperModal
+          imageFile={rawCropFile}
+          aspectRatio={16 / 9}
+          title="Crop Gallery Image (16:9)"
+          onCropComplete={handleCropComplete}
+          onClose={handleCropperClose}
+        />
       )}
     </div>
   );
