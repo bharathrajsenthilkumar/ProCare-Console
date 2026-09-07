@@ -113,11 +113,11 @@ export default function ProtectedLayout({
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-slate-200 dark:bg-slate-900 dark:border-slate-800">
         {/* Branding */}
-        <div className="flex items-center gap-2.5 px-6 py-5 border-b border-slate-100 dark:border-slate-800">
-          <div className="relative h-10 w-10 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3 px-5 py-4.5 border-b border-slate-100 dark:border-slate-800">
+          <div className="relative h-12 w-12 flex items-center justify-center shrink-0">
             <img src="/logo.png" alt="ProCare Logo" className="h-full w-full object-contain" />
           </div>
-          <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
+          <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
             Procare<span className="text-sky-600 font-semibold">Console</span>
           </span>
         </div>
@@ -213,12 +213,14 @@ export default function ProtectedLayout({
 
           {/* Drawer Panel */}
           <div className="relative flex flex-col w-64 bg-white border-r border-slate-200 text-slate-700 animate-slide-in dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="relative h-10 w-10 flex items-center justify-center shrink-0">
+            <div className="flex items-center justify-between px-5 py-4.5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="relative h-12 w-12 flex items-center justify-center shrink-0">
                   <img src="/logo.png" alt="ProCare Logo" className="h-full w-full object-contain" />
                 </div>
-                <span className="text-base font-bold text-slate-900 dark:text-white">Procare Console</span>
+                <span className="text-lg font-bold text-slate-900 dark:text-white">
+                  Procare<span className="text-sky-600 font-semibold">Console</span>
+                </span>
               </div>
               <button
                 type="button"
