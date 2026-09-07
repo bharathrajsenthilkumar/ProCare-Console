@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -323,19 +324,13 @@ export default function LogsPage() {
 
       {/* Main Content Area */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-12 flex flex-col items-center justify-center gap-3">
-          <svg className="animate-spin h-6 w-6 text-slate-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-          <span className="text-xs text-slate-400 font-semibold tracking-wider uppercase">Loading diagnostics logs...</span>
-        </div>
+        <LoadingState message="Loading diagnostics logs..." />
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 flex items-start gap-3 max-w-md mx-auto">
-          <AlertCircle className="h-6 w-6 text-red-600 shrink-0" />
+        <div className="bg-red-50 dark:bg-rose-950/20 border border-red-200 dark:border-rose-800/80 rounded-xl p-6 flex items-start gap-3 max-w-md mx-auto">
+          <AlertCircle className="h-6 w-6 text-red-600 dark:text-rose-400 shrink-0" />
           <div>
-            <h4 className="font-bold text-red-800 text-sm">System Database Error</h4>
-            <p className="text-xs text-red-700 mt-1 leading-relaxed">{error}</p>
+            <h4 className="font-bold text-red-800 dark:text-rose-200 text-sm">System Database Error</h4>
+            <p className="text-xs text-red-700 dark:text-rose-300 mt-1 leading-relaxed">{error}</p>
           </div>
         </div>
       ) : logs.length === 0 ? (
@@ -354,9 +349,9 @@ export default function LogsPage() {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between bg-white border border-slate-200/80 shadow-sm rounded-xl px-5 py-4">
-              <div className="text-xs text-slate-500">
-                Showing page <span className="font-semibold text-slate-700">{page}</span> of <span className="font-semibold text-slate-700">{totalPages}</span>
+            <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-xl px-5 py-4">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Showing page <span className="font-semibold text-slate-700 dark:text-slate-200">{page}</span> of <span className="font-semibold text-slate-700 dark:text-slate-200">{totalPages}</span>
               </div>
               <div className="flex gap-2">
                 <Button 
@@ -387,13 +382,13 @@ export default function LogsPage() {
       {isDeleteConfirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs" onClick={() => setIsDeleteConfirmOpen(false)} />
-          <div className="bg-white border border-slate-200 shadow-xl rounded-2xl w-full max-w-md flex flex-col relative z-10 p-6 animate-scale-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl w-full max-w-md flex flex-col relative z-10 p-6 animate-scale-in">
             <div className="flex items-center gap-3 text-rose-600 mb-4">
               <AlertTriangle className="h-6 w-6" />
-              <h3 className="text-base font-bold">Delete Selected System Logs?</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Delete Selected System Logs?</h3>
             </div>
-            <p className="text-xs text-slate-500 leading-relaxed mb-6">
-              This action permanently deletes the <strong className="text-slate-800">{selectedLogIds.length}</strong> selected system diagnostic logs. This action cannot be undone.
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+              This action permanently deletes the <strong className="text-slate-800 dark:text-slate-200">{selectedLogIds.length}</strong> selected system diagnostic logs. This action cannot be undone.
             </p>
             <div className="flex justify-end gap-2">
               <Button variant="secondary" size="sm" onClick={() => setIsDeleteConfirmOpen(false)} disabled={deleteLoading}>

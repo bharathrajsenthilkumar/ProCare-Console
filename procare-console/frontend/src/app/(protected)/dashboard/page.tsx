@@ -451,25 +451,25 @@ export default function DashboardPage() {
         {cards.map((card) => (
           <Card key={card.name} hoverEffect>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <CardTitle className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {card.name}
               </CardTitle>
-              <div className="p-2 bg-slate-50 border border-slate-100 rounded-lg text-slate-500">
+              <div className="p-2 bg-slate-50 border border-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 rounded-lg text-slate-500">
                 <card.icon className="h-4.5 w-4.5 stroke-[1.8]" />
               </div>
             </CardHeader>
             <CardContent>
-              {loading && backendStatus === 'checking' ? (
-                <div className="h-7 w-20 bg-slate-100 animate-pulse rounded" />
+              {loading ? (
+                <div className="h-7 w-20 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-md" />
               ) : (
                 <div className="text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">{card.value}</div>
               )}
-              <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">{card.description}</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">{card.description}</p>
               
-              <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                 <Link 
                   href={card.link}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 hover:text-sky-800 transition-colors"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 transition-colors"
                 >
                   <span>Manage</span>
                   <ArrowRight className="h-3 w-3" />

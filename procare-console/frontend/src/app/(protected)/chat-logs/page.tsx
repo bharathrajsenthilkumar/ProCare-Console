@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -292,15 +293,7 @@ export default function ChatLogsPage() {
           onClick={(e) => e.stopPropagation()}
         />
       ),
-      className: 'w-12 text-center',
-    },
-    {
-      header: 'Session ID',
-      accessor: (row) => (
-        <span className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-350 bg-slate-50 dark:bg-slate-950 border border-slate-100/80 dark:border-slate-800 px-2 py-0.5 rounded">
-          {row.session_id.substring(0, 12)}...
-        </span>
-      ),
+      className: 'w-12 text-center whitespace-nowrap',
     },
     {
       header: 'Patient Identity',
@@ -312,6 +305,7 @@ export default function ChatLogsPage() {
           )}
         </div>
       ),
+      className: 'whitespace-nowrap',
     },
     {
       header: 'Channel',
@@ -320,11 +314,12 @@ export default function ChatLogsPage() {
           {row.channel.toUpperCase()}
         </Badge>
       ),
+      className: 'whitespace-nowrap',
     },
     {
       header: 'Messages',
       accessor: (row) => `${row.message_count} dialogs`,
-      className: 'text-slate-500 dark:text-slate-400',
+      className: 'text-slate-500 dark:text-slate-400 whitespace-nowrap',
     },
     {
       header: 'Latency (Avg)',
@@ -333,6 +328,7 @@ export default function ChatLogsPage() {
           {row.average_response_time}ms
         </span>
       ),
+      className: 'whitespace-nowrap',
     },
     {
       header: 'Latest Active',
@@ -342,7 +338,7 @@ export default function ChatLogsPage() {
         hour: '2-digit',
         minute: '2-digit'
       }),
-      className: 'text-slate-400 dark:text-slate-500 text-xs font-medium',
+      className: 'text-slate-400 dark:text-slate-500 text-xs font-medium whitespace-nowrap',
     },
     {
       header: 'Action',
@@ -351,7 +347,7 @@ export default function ChatLogsPage() {
           <span>View Log</span>
         </Button>
       ),
-      className: 'text-right',
+      className: 'text-right whitespace-nowrap',
     },
   ];
 
@@ -418,11 +414,11 @@ export default function ChatLogsPage() {
             </div>
             
             {/* Channel Filter */}
-            <div className="w-full sm:w-40 relative">
+            <div className="w-full sm:w-48 sm:min-w-[180px] relative">
               <select
                 value={channel}
                 onChange={(e) => setChannel(e.target.value)}
-                className="block w-full border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2.5 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent select-none cursor-pointer"
+                className="block w-full border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2.5 pr-8 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent select-none cursor-pointer"
               >
                 <option value="">All Channels</option>
                 <option value="website">Website</option>
@@ -473,19 +469,13 @@ export default function ChatLogsPage() {
 
       {/* Main Table Area */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-12 flex flex-col items-center justify-center gap-3">
-          <svg className="animate-spin h-6 w-6 text-slate-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-          <span className="text-xs text-slate-400 font-semibold tracking-wider uppercase">Loading conversational logs...</span>
-        </div>
+        <LoadingState message="Loading conversational logs..." />
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 flex items-start gap-3 max-w-md mx-auto">
-          <AlertCircle className="h-6 w-6 text-red-600 shrink-0" />
+        <div className="bg-red-50 dark:bg-rose-950/20 border border-red-200 dark:border-rose-800/80 rounded-xl p-6 flex items-start gap-3 max-w-md mx-auto">
+          <AlertCircle className="h-6 w-6 text-red-600 dark:text-rose-400 shrink-0" />
           <div>
-            <h4 className="font-bold text-red-800 text-sm">System Database Error</h4>
-            <p className="text-xs text-red-700 mt-1 leading-relaxed">{error}</p>
+            <h4 className="font-bold text-red-800 dark:text-rose-200 text-sm">System Database Error</h4>
+            <p className="text-xs text-red-700 dark:text-rose-300 mt-1 leading-relaxed">{error}</p>
           </div>
         </div>
       ) : sessions.length === 0 ? (
@@ -500,13 +490,14 @@ export default function ChatLogsPage() {
             columns={columns} 
             data={sessions} 
             keyExtractor={(row) => row.session_id} 
+            tableClassName="min-w-[700px]"
           />
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between bg-white border border-slate-200/80 shadow-sm rounded-xl px-5 py-4">
-              <div className="text-xs text-slate-500">
-                Showing page <span className="font-semibold text-slate-700">{page}</span> of <span className="font-semibold text-slate-700">{totalPages}</span>
+            <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-xl px-5 py-4">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Showing page <span className="font-semibold text-slate-700 dark:text-slate-200">{page}</span> of <span className="font-semibold text-slate-700 dark:text-slate-200">{totalPages}</span>
               </div>
               <div className="flex gap-2">
                 <Button 
