@@ -19,7 +19,9 @@ import {
   Check,
   ShieldCheck,
   Filter,
-  Lock
+  Lock,
+  List,
+  CalendarDays
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -27,6 +29,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent } from '@/components/ui/Card';
 import { DataTable, Column } from '@/components/ui/DataTable';
+import AppointmentCalendar from '@/components/AppointmentCalendar';
 
 export type AppointmentStatus = 'pending' | 'confirmed' | 'visited' | 'canceled' | 'no_show';
 
@@ -203,14 +206,15 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Search, Status Filter & Pagination States
+  // Search, Status Filter, View Mode & Pagination States
+  const [view, setView] = useState<'list' | 'calendar'>('list');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [date, setDate] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const limit = 10;
+  const limit = view === 'calendar' ? 500 : 10;
 
   // Slide-out Drawer State
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -234,7 +238,7 @@ export default function AppointmentsPage() {
   // Reset page when filter changes
   useEffect(() => {
     setPage(1);
-  }, [date, statusFilter]);
+  }, [date, statusFilter, view]);
 
   // Fetch Appointments with cache-busting and automatic DB update for expired slots
   const fetchAppointments = async () => {
@@ -243,7 +247,9 @@ export default function AppointmentsPage() {
     setError(null);
     
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
-    let url = `${apiUrl}/appointments?page=${page}&limit=${limit}&_t=${Date.now()}`;
+    const currentLimit = view === 'calendar' ? 500 : 10;
+    const currentPage = view === 'calendar' ? 1 : page;
+    let url = `${apiUrl}/appointments?page=${currentPage}&limit=${currentLimit}&_t=${Date.now()}`;
     
     if (debouncedSearch) {
       url += `&search=${encodeURIComponent(debouncedSearch)}`;
@@ -274,8 +280,8 @@ export default function AppointmentsPage() {
         const normalized = rawList.map((appt) => {
           const rawStatus = (appt.status || 'pending').toLowerCase() as AppointmentStatus;
           const isExpired = isAppointmentExpired(appt);
-
-          if ((rawStatus === 'pending' || rawStatus === 'confirmed') && isExpired) {
+          
+          if (isExpired && (rawStatus === 'pending' || rawStatus === 'confirmed')) {
             if (!syncedIdsRef.current.has(appt.id)) {
               expiredPendingIdsToSync.push(appt.id);
               syncedIdsRef.current.add(appt.id);
@@ -286,12 +292,12 @@ export default function AppointmentsPage() {
         });
 
         setAppointments(normalized);
-        setTotal(data.total || normalized.length);
+        setTotal(data.total || 0);
 
-        // Permanently persist any expired records to Supabase via backend PATCH
+        // Background auto-sync of expired slots to DB
         if (expiredPendingIdsToSync.length > 0) {
-          expiredPendingIdsToSync.forEach(async (apptId) => {
-            try {
+          Promise.all(
+            expiredPendingIdsToSync.map(async (apptId) => {
               await fetch(`${apiUrl}/appointments/${apptId}`, {
                 method: 'PATCH',
                 headers: {
@@ -299,11 +305,9 @@ export default function AppointmentsPage() {
                   'Authorization': `Bearer ${session.access_token}`,
                 },
                 body: JSON.stringify({ status: 'no_show' }),
-              });
-            } catch (syncErr) {
-              console.error(`[Auto No-Show Sync] Error updating appt ${apptId}:`, syncErr);
-            }
-          });
+              }).catch(() => {});
+            })
+          ).catch((e) => console.error('[Auto-Sync Error]', e));
         }
       } else {
         setError('Failed to retrieve appointments registry.');
@@ -317,7 +321,7 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     fetchAppointments();
-  }, [session, page, debouncedSearch, date, statusFilter]);
+  }, [session, page, debouncedSearch, date, statusFilter, view]);
 
   // Open Drawer when an appointment row is clicked
   const handleRowClick = (appointment: Appointment) => {
@@ -396,24 +400,32 @@ export default function AppointmentsPage() {
   const columns: Column<Appointment>[] = [
     {
       header: 'Patient Name',
-      className: 'w-[20%] min-w-[180px]',
-      headerClassName: 'text-center',
-      cellClassName: 'text-left pl-8',
       accessor: (row) => (
-        <div className="flex items-center justify-start gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-300 flex items-center justify-center font-bold text-xs shrink-0">
+        <div className="flex items-center justify-start gap-3 pl-8">
+          <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 flex items-center justify-center font-bold text-xs shrink-0">
             {row.patient_name ? row.patient_name.charAt(0).toUpperCase() : 'P'}
           </div>
-          <span className="font-semibold text-slate-800 dark:text-slate-100 truncate">
-            {row.patient_name || 'Anonymous Patient'}
-          </span>
+          <div className="min-w-0">
+            <span className="font-semibold text-slate-800 dark:text-slate-100 truncate block text-sm">
+              {row.patient_name || 'Anonymous Patient'}
+            </span>
+          </div>
         </div>
       ),
+      className: 'w-[25%] min-w-[200px]',
+      headerClassName: 'text-center',
     },
     {
       header: 'Phone Number',
-      accessor: (row) => row.phone_number || 'N/A',
-      className: 'w-[15%] min-w-[125px] text-center text-slate-600 dark:text-slate-400 font-mono text-xs',
+      accessor: (row) => row.phone_number ? (
+        <span className="text-slate-700 dark:text-slate-200 font-mono text-xs flex items-center justify-center gap-1">
+          <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <span className="truncate">{row.phone_number}</span>
+        </span>
+      ) : (
+        <span className="text-slate-400 text-xs">N/A</span>
+      ),
+      className: 'w-[15%] min-w-[130px] text-center',
     },
     {
       header: 'WhatsApp',
@@ -472,7 +484,7 @@ export default function AppointmentsPage() {
           </span>
         );
       },
-      className: 'w-[20%] min-w-[190px] text-center',
+      className: 'w-[15%] min-w-[160px] text-center',
     },
   ];
 
@@ -511,18 +523,49 @@ export default function AppointmentsPage() {
 
       {/* Filter & Search Bar */}
       <Card>
-        <CardContent className="!p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:max-w-xs">
-            <Input
-              id="search"
-              placeholder="Search patient, phone, or whatsapp..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              icon={<Search className="h-4 w-4 text-slate-400" />}
-            />
+        <CardContent className="!p-5 flex flex-col lg:flex-row gap-4 items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+            {/* Search Box */}
+            <div className="relative w-full sm:w-72">
+              <Input
+                id="search"
+                placeholder="Search patient, phone, or whatsapp..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                icon={<Search className="h-4 w-4 text-slate-400" />}
+              />
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="inline-flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shrink-0 w-full sm:w-auto justify-center">
+              <button
+                type="button"
+                onClick={() => setView('list')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  view === 'list'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                <List className="w-3.5 h-3.5" />
+                <span>List View</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('calendar')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  view === 'calendar'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span>Calendar View</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
             {/* Status Filter Dropdown */}
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider shrink-0 flex items-center gap-1">
@@ -571,7 +614,7 @@ export default function AppointmentsPage() {
         </CardContent>
       </Card>
 
-      {/* Main Table Content */}
+      {/* Main Content (Table or Calendar) */}
       {loading ? (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-16 flex flex-col items-center justify-center gap-3">
           <RefreshCw className="animate-spin h-7 w-7 text-sky-500" />
@@ -591,10 +634,15 @@ export default function AppointmentsPage() {
           title="No Appointments Found"
           description="We couldn't find any patient appointments matching your current search terms or date filter."
         />
+      ) : view === 'calendar' ? (
+        <AppointmentCalendar 
+          data={appointments}
+          onSelectAppointment={handleRowClick}
+        />
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1 text-xs text-slate-400 dark:text-slate-500">
-            <span>💡 Click any patient row to open the detailed management drawer.</span>
+            <span>💡 Click any patient row to open the detailed management modal.</span>
           </div>
 
           <DataTable 

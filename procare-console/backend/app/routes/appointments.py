@@ -133,7 +133,7 @@ def sync_no_show_appointments():
 @router.get("", response_model=AppointmentsListResponse)
 async def list_appointments(
     page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(10, ge=1, le=1000),
     search: str = Query(None),
     date: str = Query(None),
     status_filter: str = Query(None, alias="status"),
