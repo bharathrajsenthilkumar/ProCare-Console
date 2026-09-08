@@ -29,7 +29,17 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent } from '@/components/ui/Card';
 import { DataTable, Column } from '@/components/ui/DataTable';
-import AppointmentCalendar from '@/components/AppointmentCalendar';
+import dynamic from 'next/dynamic';
+
+const AppointmentCalendar = dynamic(() => import('@/components/AppointmentCalendar'), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-16 flex flex-col items-center justify-center gap-3">
+      <RefreshCw className="animate-spin h-7 w-7 text-sky-500" />
+      <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold tracking-wider uppercase">Loading Calendar View...</span>
+    </div>
+  ),
+});
 
 export type AppointmentStatus = 'pending' | 'confirmed' | 'visited' | 'canceled' | 'no_show';
 
@@ -214,7 +224,7 @@ export default function AppointmentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const limit = view === 'calendar' ? 500 : 10;
+  const limit = 10;
 
   // Slide-out Drawer State
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -238,7 +248,7 @@ export default function AppointmentsPage() {
   // Reset page when filter changes
   useEffect(() => {
     setPage(1);
-  }, [date, statusFilter, view]);
+  }, [date, statusFilter]);
 
   // Fetch Appointments with cache-busting and automatic DB update for expired slots
   const fetchAppointments = async () => {
@@ -247,9 +257,7 @@ export default function AppointmentsPage() {
     setError(null);
     
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8001/api/v1');
-    const currentLimit = view === 'calendar' ? 500 : 10;
-    const currentPage = view === 'calendar' ? 1 : page;
-    let url = `${apiUrl}/appointments?page=${currentPage}&limit=${currentLimit}&_t=${Date.now()}`;
+    let url = `${apiUrl}/appointments?page=${page}&limit=${limit}&_t=${Date.now()}`;
     
     if (debouncedSearch) {
       url += `&search=${encodeURIComponent(debouncedSearch)}`;
@@ -321,7 +329,7 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     fetchAppointments();
-  }, [session, page, debouncedSearch, date, statusFilter, view]);
+  }, [session, page, debouncedSearch, date, statusFilter]);
 
   // Open Drawer when an appointment row is clicked
   const handleRowClick = (appointment: Appointment) => {

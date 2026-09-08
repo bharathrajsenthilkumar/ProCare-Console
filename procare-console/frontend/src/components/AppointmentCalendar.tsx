@@ -12,97 +12,140 @@ interface AppointmentCalendarProps {
   onSelectAppointment: (appointment: Appointment) => void;
 }
 
-const STATUS_COLORS: Record<AppointmentStatus, { bg: string; border: string; text: string; dot: string; darkBg: string; darkText: string }> = {
+const STATUS_COLORS: Record<AppointmentStatus, { bg: string; border: string; text: string; dot: string }> = {
   pending: { 
     bg: '#fef3c7', 
     border: '#f59e0b', 
     text: '#92400e', 
     dot: '#d97706',
-    darkBg: '#78350f40',
-    darkText: '#fde68a'
   },
   confirmed: { 
     bg: '#e0f2fe', 
     border: '#0284c7', 
     text: '#0369a1', 
     dot: '#0284c7',
-    darkBg: '#0c4a6e50',
-    darkText: '#bae6fd'
   },
   visited: { 
     bg: '#d1fae5', 
     border: '#10b981', 
     text: '#065f46', 
     dot: '#10b981',
-    darkBg: '#064e3b50',
-    darkText: '#a7f3d0'
   },
   canceled: { 
     bg: '#ffe4e6', 
     border: '#f43f5e', 
     text: '#9f1239', 
     dot: '#e11d48',
-    darkBg: '#88133740',
-    darkText: '#fecdd3'
   },
   no_show: { 
     bg: '#f1f5f9', 
     border: '#64748b', 
     text: '#334155', 
     dot: '#64748b',
-    darkBg: '#1e293b60',
-    darkText: '#cbd5e1'
   },
 };
 
+/**
+ * Safely constructs a valid ISO 8601 string (YYYY-MM-DDTHH:mm:ss)
+ */
+function createSafeIsoDateTime(dateStr: string | null | undefined, timeStr: string | null | undefined, fallbackTime: string): string {
+  try {
+    if (!dateStr) return '';
+
+    let cleanDate = dateStr.trim();
+    if (cleanDate.includes('T')) {
+      cleanDate = cleanDate.split('T')[0];
+    }
+
+    // Ensure valid YYYY-MM-DD format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+      const parsed = new Date(dateStr);
+      if (isNaN(parsed.getTime())) return '';
+      cleanDate = parsed.toISOString().split('T')[0];
+    }
+
+    let cleanTime = (timeStr || fallbackTime).trim();
+    if (/^\d{1,2}:\d{2}$/.test(cleanTime)) {
+      const parts = cleanTime.split(':');
+      const hh = parts[0].padStart(2, '0');
+      const mm = parts[1];
+      cleanTime = `${hh}:${mm}:00`;
+    } else if (/^\d{1,2}:\d{2}:\d{2}$/.test(cleanTime)) {
+      const parts = cleanTime.split(':');
+      const hh = parts[0].padStart(2, '0');
+      cleanTime = `${hh}:${parts[1]}:${parts[2]}`;
+    } else {
+      cleanTime = `${fallbackTime}:00`;
+    }
+
+    const isoString = `${cleanDate}T${cleanTime}`;
+    const testDate = new Date(isoString);
+    if (isNaN(testDate.getTime())) return '';
+    return isoString;
+  } catch (err) {
+    console.warn('[Calendar Date Parse Warning]', err, { dateStr, timeStr });
+    return '';
+  }
+}
+
 export default function AppointmentCalendar({
-  data,
+  data = [],
   onSelectAppointment,
 }: AppointmentCalendarProps) {
 
-  // Map appointments to FullCalendar event format
+  // Map appointments to FullCalendar event format safely
   const events = useMemo(() => {
-    return data.map((appt) => {
-      let dateStr = appt.appointment_date || '';
-      if (dateStr.includes('T')) {
-        dateStr = dateStr.split('T')[0];
+    if (!Array.isArray(data)) return [];
+
+    const mappedEvents = [];
+
+    for (const appt of data) {
+      try {
+        if (!appt || !appt.id) continue;
+
+        const start = createSafeIsoDateTime(appt.appointment_date, appt.start_time, '09:00');
+        const end = createSafeIsoDateTime(appt.appointment_date, appt.end_time || appt.start_time, '10:00');
+
+        if (!start) continue;
+
+        const statusKey = (appt.status || 'pending').toLowerCase() as AppointmentStatus;
+        const colorScheme = STATUS_COLORS[statusKey] || STATUS_COLORS.pending;
+
+        mappedEvents.push({
+          id: appt.id,
+          title: appt.patient_name || 'Anonymous Patient',
+          start,
+          end: end || undefined,
+          backgroundColor: colorScheme.bg,
+          borderColor: colorScheme.border,
+          textColor: colorScheme.text,
+          extendedProps: {
+            appointment: appt,
+            status: statusKey,
+            dotColor: colorScheme.dot,
+          },
+        });
+      } catch (err) {
+        console.error('[Appointment Mapping Error for Item]', appt, err);
       }
+    }
 
-      const startTime = appt.start_time ? appt.start_time.substring(0, 5) : '09:00';
-      const endTime = appt.end_time ? appt.end_time.substring(0, 5) : '10:00';
-
-      const start = dateStr ? `${dateStr}T${startTime}:00` : new Date().toISOString();
-      const end = dateStr ? `${dateStr}T${endTime}:00` : new Date().toISOString();
-
-      const statusKey = (appt.status || 'pending').toLowerCase() as AppointmentStatus;
-      const colorScheme = STATUS_COLORS[statusKey] || STATUS_COLORS.pending;
-
-      return {
-        id: appt.id,
-        title: appt.patient_name || 'Anonymous Patient',
-        start,
-        end,
-        backgroundColor: colorScheme.bg,
-        borderColor: colorScheme.border,
-        textColor: colorScheme.text,
-        extendedProps: {
-          appointment: appt,
-          status: statusKey,
-          dotColor: colorScheme.dot,
-        },
-      };
-    });
+    return mappedEvents;
   }, [data]);
 
   const handleEventClick = (clickInfo: any) => {
-    const appt = clickInfo.event.extendedProps?.appointment;
-    if (appt) {
-      onSelectAppointment(appt);
+    try {
+      const appt = clickInfo.event.extendedProps?.appointment;
+      if (appt && onSelectAppointment) {
+        onSelectAppointment(appt);
+      }
+    } catch (err) {
+      console.error('[Event Click Error]', err);
     }
   };
 
   const renderEventContent = (eventInfo: any) => {
-    const { dotColor } = eventInfo.event.extendedProps;
+    const dotColor = eventInfo.event.extendedProps?.dotColor || '#0284c7';
     return (
       <div className="w-full h-full p-1 flex flex-col justify-between overflow-hidden cursor-pointer rounded select-none">
         <div className="flex items-center gap-1.5 min-w-0">
