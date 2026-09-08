@@ -134,6 +134,24 @@ export const STATUS_MAP = STATUS_LIST.reduce<Record<AppointmentStatus, StatusCon
 );
 
 /**
+ * Normalizes any appointment status string representation from the database
+ * (e.g., 'No-Show', 'no-show', 'no_show', 'Pending', 'Confirmed / Called')
+ * into standardized keys: 'pending' | 'confirmed' | 'visited' | 'canceled' | 'no_show'
+ */
+export function normalizeStatus(status: string | null | undefined): AppointmentStatus {
+  if (!status) return 'pending';
+  const clean = status.trim().toLowerCase().replace(/[\s\-\/]+/g, '_');
+  if (clean.includes('no_show') || clean.includes('noshow')) return 'no_show';
+  if (clean.includes('confirm') || clean.includes('call')) return 'confirmed';
+  if (clean.includes('visit')) return 'visited';
+  if (clean.includes('cancel')) return 'canceled';
+  if (clean === 'pending' || clean === 'confirmed' || clean === 'visited' || clean === 'canceled' || clean === 'no_show') {
+    return clean as AppointmentStatus;
+  }
+  return 'pending';
+}
+
+/**
  * Accurately parses an appointment date and time into a JavaScript Date object.
  * Supports: YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY, YYYY/MM/DD, and ISO timestamps.
  */
@@ -286,7 +304,7 @@ export default function AppointmentsPage() {
 
         // Normalize and detect appointments whose scheduled end time has strictly passed
         const normalized = rawList.map((appt) => {
-          const rawStatus = (appt.status || 'pending').toLowerCase() as AppointmentStatus;
+          const rawStatus = normalizeStatus(appt.status);
           const isExpired = isAppointmentExpired(appt);
           
           if (isExpired && (rawStatus === 'pending' || rawStatus === 'confirmed')) {
@@ -334,7 +352,7 @@ export default function AppointmentsPage() {
   // Open Drawer when an appointment row is clicked
   const handleRowClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
-    setDrawerStatus(appointment.status || 'pending');
+    setDrawerStatus(normalizeStatus(appointment.status));
     setDrawerError(null);
     setDrawerSuccess(null);
   };
@@ -354,7 +372,7 @@ export default function AppointmentsPage() {
     return Date.now() > endDateTime.getTime();
   }, [selectedAppointment]);
 
-  // 1-Click Status Selection & Save
+  // Handle 1-Click Status Update in the Drawer
   const handleSelectStatus = async (newStatus: AppointmentStatus) => {
     // Prevent manual selection of No-Show if appointment end time has not arrived
     if (newStatus === 'no_show' && !isNoShowAllowedForDrawer) {
@@ -362,7 +380,7 @@ export default function AppointmentsPage() {
       return;
     }
 
-    setDrawerStatus(newStatus);
+    if (newStatus === drawerStatus) return;
     if (!selectedAppointment || !session) return;
 
     setIsSaving(true);
@@ -378,27 +396,27 @@ export default function AppointmentsPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          status: newStatus,
-        }),
+        body: JSON.stringify({ status: newStatus }),
       });
 
       if (response.ok) {
-        setDrawerSuccess(`Status updated to "${STATUS_MAP[newStatus]?.label || newStatus}"`);
-        // Update local list state
+        setDrawerStatus(newStatus);
+        setDrawerSuccess(`Status successfully updated to ${STATUS_MAP[newStatus]?.label || newStatus}!`);
+        
+        // Optimistically update local list state
         setAppointments((prev) => 
           prev.map((item) => (item.id === selectedAppointment.id ? { ...item, status: newStatus } : item))
         );
         setSelectedAppointment((prev) => prev ? { ...prev, status: newStatus } : null);
-        setTimeout(() => {
-          setDrawerSuccess(null);
-        }, 2500);
+
+        // Clear success message after 2.5s
+        setTimeout(() => setDrawerSuccess(null), 2500);
       } else {
-        const err = await response.json();
+        const err = await response.json().catch(() => ({}));
         setDrawerError(err.detail || 'Failed to update appointment status.');
       }
-    } catch (err) {
-      setDrawerError('Network error: Unable to reach server.');
+    } catch (e) {
+      setDrawerError('Network error: Unable to update record.');
     } finally {
       setIsSaving(false);
     }
@@ -484,7 +502,8 @@ export default function AppointmentsPage() {
     {
       header: 'Status',
       accessor: (row) => {
-        const cfg = STATUS_MAP[row.status] || STATUS_MAP.pending;
+        const normalized = normalizeStatus(row.status);
+        const cfg = STATUS_MAP[normalized] || STATUS_MAP.pending;
         return (
           <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs whitespace-nowrap ${cfg.badgeClass}`}>
             <span className={`w-2 h-2 rounded-full ${cfg.dotColor} animate-pulse shrink-0`} />
